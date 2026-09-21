@@ -53,7 +53,9 @@ brew tap tonmoy-y/netpulse
 brew install --cask netpulse
 ```
 
-This installs from the [tonmoy-y/homebrew-netpulse](https://github.com/tonmoy-y/homebrew-netpulse) tap, which is real and live — it points at the actual [v1.0.0 release DMG](https://github.com/tonmoy-y/NetPulse/releases/tag/v1.0.0) with its real checksum, built by this repo's own CI. The cask also clears the Gatekeeper quarantine flag automatically, so unlike a manual `.dmg` install there's no right-click-to-open step needed.
+This installs from the [tonmoy-y/homebrew-netpulse](https://github.com/tonmoy-y/homebrew-netpulse) tap, which is real and live — it points at the actual [v1.0.0 release DMG](https://github.com/tonmoy-y/NetPulse/releases/tag/v1.0.0) with its real checksum, built by this repo's own CI, and was verified end-to-end (`brew tap` → `brew install --cask netpulse` → app in `/Applications`) before being documented here. The cask also clears the Gatekeeper quarantine flag automatically, so unlike a manual `.dmg` install there's no right-click-to-open step needed.
+
+> If your Homebrew shows `Refusing to load cask ... from untrusted tap` (a newer Homebrew tap-trust safeguard for third-party taps), run `brew trust --cask tonmoy-y/netpulse/netpulse` once and re-run the install command.
 
 ### Option B — Download the .dmg directly
 
