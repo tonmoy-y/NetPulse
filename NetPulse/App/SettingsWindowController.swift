@@ -14,7 +14,19 @@ final class SettingsWindowController: NSWindowController, NSWindowDelegate {
     static let shared = SettingsWindowController()
 
     private convenience init() {
-        let hosting = NSHostingController(rootView: SettingsView().environmentObject(AppState.shared))
+        let hosting = NSHostingController(
+            rootView: SettingsView()
+                .environmentObject(AppState.shared)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        )
+        // NSHostingController's default sizingOptions include tracking its
+        // SwiftUI content's own "ideal size" and resizing the window to
+        // match it — every time the content's ideal size changed (e.g.
+        // switching to a tab with more or less content), the window would
+        // silently snap back to that size, undoing whatever size the user
+        // had just dragged it to. Turning that off is what actually makes
+        // manual resizing stick.
+        hosting.sizingOptions = []
 
         let window = NSWindow(contentViewController: hosting)
         window.styleMask = [.titled, .closable, .miniaturizable, .resizable]
