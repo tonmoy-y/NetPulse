@@ -28,6 +28,7 @@ final class AppState: ObservableObject {
     let dataUsageStore: DataUsageStore
     let connectionHistoryStore = ConnectionHistoryStore()
     let speedTestService = SpeedTestService()
+    let updateChecker = UpdateChecker()
 
     private var alertEngine: AlertEngine!
     private let persistence: PersistenceController
@@ -53,16 +54,27 @@ final class AppState: ObservableObject {
             self?.settings.alertRules = updated
         }
 
+        trafficSampler.primaryInterfaceProvider = { [weak self] in
+            self?.interfaceMonitor.primaryInterface?.bsdName
+        }
+
         wireUpMonitors()
     }
 
     func start() {
+        // Start interface discovery first so Auto mode's primaryInterfaceProvider
+        // has a real answer by the time the first throughput tick fires.
+        interfaceMonitor.start()
+
         trafficSampler.interfaceSelection = settings.interfaceSelection
         trafficSampler.isPaused = settings.isMonitoringPaused
         trafficSampler.start(interval: settings.refreshInterval.rawValue)
 
-        interfaceMonitor.start()
         restartLatencyMonitor()
+
+        if settings.checkForUpdatesAutomatically {
+            updateChecker.checkForUpdates()
+        }
     }
 
     func stop() {

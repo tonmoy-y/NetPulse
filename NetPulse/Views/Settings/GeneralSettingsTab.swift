@@ -24,6 +24,14 @@ struct GeneralSettingsTab: View {
                     .foregroundStyle(Color.netPulseTextMuted)
             }
 
+            Section("Updates") {
+                Toggle("Automatically check for updates on launch", isOn: $appState.settings.checkForUpdatesAutomatically)
+                updateStatusRow
+                Text("Checks GitHub Releases for a newer NetPulse version — a single anonymous request, no analytics or identifying data. It only tells you a new version exists; it never downloads or installs anything automatically.")
+                    .font(.netPulseCaption)
+                    .foregroundStyle(Color.netPulseTextMuted)
+            }
+
             Section {
                 Button("Reset All Settings…") { showResetConfirmation = true }
                     .foregroundStyle(Color.netPulseError)
@@ -33,6 +41,41 @@ struct GeneralSettingsTab: View {
         .confirmationDialog("Reset all NetPulse settings to their defaults?", isPresented: $showResetConfirmation, titleVisibility: .visible) {
             Button("Reset", role: .destructive) { appState.resetAllSettings() }
             Button("Cancel", role: .cancel) {}
+        }
+    }
+
+    @ViewBuilder
+    private var updateStatusRow: some View {
+        switch appState.updateChecker.state {
+        case .idle:
+            Button("Check for Updates") { appState.updateChecker.checkForUpdates() }
+
+        case .checking:
+            HStack {
+                ProgressView().controlSize(.small)
+                Text("Checking for updates…").font(.netPulseCaption)
+            }
+
+        case .upToDate:
+            HStack {
+                Text("You're up to date.").font(.netPulseCaption).foregroundStyle(Color.netPulseSuccess)
+                Spacer()
+                Button("Check Again") { appState.updateChecker.checkForUpdates() }
+            }
+
+        case .updateAvailable(let version, let url):
+            HStack {
+                Text("\(version) is available.").font(.netPulseCaption).foregroundStyle(Color.netPulsePrimary)
+                Spacer()
+                Link("View Release", destination: url)
+            }
+
+        case .failed(let message):
+            HStack {
+                Text(message).font(.netPulseCaption).foregroundStyle(Color.netPulseTextMuted)
+                Spacer()
+                Button("Retry") { appState.updateChecker.checkForUpdates() }
+            }
         }
     }
 }

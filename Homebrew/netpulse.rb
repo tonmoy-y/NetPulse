@@ -11,7 +11,15 @@ cask "netpulse" do
 
   app "NetPulse.app"
 
-  postflight_steps do
+  # NOTE: `postflight do ... end` is deprecated in favor of
+  # `postflight_steps do ... end` on newer Homebrew, but `appdir` is not
+  # defined inside that new block on the Homebrew version this was tested
+  # against, which made the whole cask fail to parse ("undefined local
+  # variable or method 'appdir'") — breaking `brew tap`/`brew install`
+  # entirely, not just producing a warning. Keeping the working `postflight`
+  # form until `postflight_steps` support stabilizes; verified working by
+  # actually running `brew install --cask netpulse` end to end.
+  postflight do
     # NetPulse is ad-hoc signed, not notarized with a paid Apple Developer
     # ID. Clearing quarantine here is the Homebrew-standard equivalent of
     # the one-time Right-click → Open step a manual .dmg install needs.

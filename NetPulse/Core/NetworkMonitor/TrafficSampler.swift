@@ -17,6 +17,13 @@ final class TrafficSampler: ObservableObject {
     var interfaceSelection: InterfaceSelectionMode = .auto
     var isPaused: Bool = false
 
+    /// Supplies the BSD name of the currently-primary interface (the same
+    /// one InterfaceMonitor shows as "Interface" in the popup) for Auto
+    /// mode. Set by AppState. If nil (e.g. briefly at launch before the
+    /// first interface scan completes), Auto mode falls back to summing all
+    /// non-virtual interfaces rather than reporting nothing.
+    var primaryInterfaceProvider: (() -> String?)?
+
     func start(interval: TimeInterval) {
         stop()
         previousReading = nil
@@ -50,8 +57,24 @@ final class TrafficSampler: ObservableObject {
 
         switch interfaceSelection {
         case .auto:
-            raw = InterfaceCounterReader.aggregate(allCounters)
-            selectedName = "auto"
+            // Track ONE real interface's counters, not a sum across every
+            // interface getifaddrs reports. macOS surfaces a churn of
+            // ephemeral pseudo-interfaces (awdl0, llw0, bridge100, utun*,
+            // ap1, ...) that flap up/down independently of real traffic;
+            // summing them made the aggregate occasionally dip below its
+            // previous value between ticks, which ThroughputCalculator
+            // clamps to a false 0 B/s. Following the same single interface
+            // InterfaceMonitor already identified as primary avoids that
+            // entirely and keeps the menu bar in sync with the interface
+            // name shown in the popup.
+            if let primaryName = primaryInterfaceProvider?(),
+               let match = allCounters.first(where: { $0.bsdName == primaryName }) {
+                raw = match
+                selectedName = primaryName
+            } else {
+                raw = InterfaceCounterReader.aggregate(allCounters)
+                selectedName = "auto"
+            }
         case .specific(let bsdName):
             if let match = allCounters.first(where: { $0.bsdName == bsdName }) {
                 raw = match

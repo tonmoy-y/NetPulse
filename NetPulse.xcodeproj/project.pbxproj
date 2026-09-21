@@ -25,6 +25,7 @@
 		4705CE57AB8EF3604BE3EC65 /* AlertsSettingsTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = B072A6C36B5F90CBD7F81985 /* AlertsSettingsTab.swift */; };
 		4F3F049F433528C15AC305CF /* PersistenceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408760726171DD39D3144CFF /* PersistenceController.swift */; };
 		530624F12869E6CBC84A6CC2 /* LatencySettingsTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 064D329B89A5AE4A96FE631A /* LatencySettingsTab.swift */; };
+		53941CEA1345722B2661054C /* UpdateChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BAEA50FC9D7966EFD2E17F6 /* UpdateChecker.swift */; };
 		804616A299F12A4E7F0C0968 /* AdvancedSettingsTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9965E8D47AAE5401858EFE02 /* AdvancedSettingsTab.swift */; };
 		841ED53D921C84D2F9A9DC00 /* TrafficGraphView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFBD73EB995724667AD6BB72 /* TrafficGraphView.swift */; };
 		9B27BBE650C1FD84F9899241 /* AboutTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DE4B9E3ACEA55C6A2024833 /* AboutTab.swift */; };
@@ -58,6 +59,7 @@
 		3AD949D356FBCCE883E6D8FD /* DataUsageStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataUsageStore.swift; sourceTree = "<group>"; };
 		408760726171DD39D3144CFF /* PersistenceController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceController.swift; sourceTree = "<group>"; };
 		4A0C5248A3EDDA4FF320FDD9 /* AlertEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertEngine.swift; sourceTree = "<group>"; };
+		4BAEA50FC9D7966EFD2E17F6 /* UpdateChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateChecker.swift; sourceTree = "<group>"; };
 		608E96A1786E8A69EBD99555 /* TrafficSampler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrafficSampler.swift; sourceTree = "<group>"; };
 		64D3CBE9211F53A57ED6116A /* NetPulse.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NetPulse.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6CEF82E17C828F70639F765F /* AppWindowRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppWindowRouter.swift; sourceTree = "<group>"; };
@@ -138,6 +140,7 @@
 			isa = PBXGroup;
 			children = (
 				B3DDF7CA259E5353FBF52298 /* PublicIPService.swift */,
+				4BAEA50FC9D7966EFD2E17F6 /* UpdateChecker.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -446,6 +449,7 @@
 				BD5DCF80AD8BAD4FC3517A96 /* StatisticsView.swift in Sources */,
 				841ED53D921C84D2F9A9DC00 /* TrafficGraphView.swift in Sources */,
 				B3930CCB0C6068178F170F5E /* TrafficSampler.swift in Sources */,
+				53941CEA1345722B2661054C /* UpdateChecker.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -472,7 +476,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 1.0.0;
+				MARKETING_VERSION = 1.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.tonmoysarkersourav.netpulse;
 				PRODUCT_NAME = NetPulse;
 				SDKROOT = macosx;
@@ -563,7 +567,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 1.0.0;
+				MARKETING_VERSION = 1.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.tonmoysarkersourav.netpulse;
 				PRODUCT_NAME = NetPulse;
 				SDKROOT = macosx;

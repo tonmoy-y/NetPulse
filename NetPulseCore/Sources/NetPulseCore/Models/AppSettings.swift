@@ -83,6 +83,7 @@ public struct AppSettings: Codable, Equatable {
     public var launchAtLogin: Bool = false
     public var startHidden: Bool = false
     public var isMonitoringPaused: Bool = false
+    public var checkForUpdatesAutomatically: Bool = true
 
     public var menuBar: MenuBarDisplayOptions = MenuBarDisplayOptions()
     public var interfaceSelection: InterfaceSelectionMode = .auto
