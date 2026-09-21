@@ -29,6 +29,7 @@ final class AppState: ObservableObject {
     let connectionHistoryStore = ConnectionHistoryStore()
     let speedTestService = SpeedTestService()
     let updateChecker = UpdateChecker()
+    let selfUpdateInstaller = SelfUpdateInstaller()
 
     private var alertEngine: AlertEngine!
     private let persistence: PersistenceController

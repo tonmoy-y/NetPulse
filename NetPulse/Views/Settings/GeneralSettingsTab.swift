@@ -27,7 +27,7 @@ struct GeneralSettingsTab: View {
             Section("Updates") {
                 Toggle("Automatically check for updates on launch", isOn: $appState.settings.checkForUpdatesAutomatically)
                 updateStatusRow
-                Text("Checks GitHub Releases for a newer NetPulse version — a single anonymous request, no analytics or identifying data. It only tells you a new version exists; it never downloads or installs anything automatically.")
+                Text("Checks GitHub Releases for a newer NetPulse version — a single anonymous request, no analytics or identifying data. \"Update Now\" downloads and installs it in place, then relaunches; nothing happens automatically without you starting it.")
                     .font(.netPulseCaption)
                     .foregroundStyle(Color.netPulseTextMuted)
             }
@@ -63,18 +63,56 @@ struct GeneralSettingsTab: View {
                 Button("Check Again") { appState.updateChecker.checkForUpdates() }
             }
 
-        case .updateAvailable(let version, let url):
-            HStack {
-                Text("\(version) is available.").font(.netPulseCaption).foregroundStyle(Color.netPulsePrimary)
-                Spacer()
-                Link("View Release", destination: url)
-            }
+        case .updateAvailable(let version, let releaseURL, let downloadURL):
+            updateAvailableRow(version: version, releaseURL: releaseURL, downloadURL: downloadURL)
 
         case .failed(let message):
             HStack {
                 Text(message).font(.netPulseCaption).foregroundStyle(Color.netPulseTextMuted)
                 Spacer()
                 Button("Retry") { appState.updateChecker.checkForUpdates() }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func updateAvailableRow(version: String, releaseURL: URL, downloadURL: URL?) -> some View {
+        switch appState.selfUpdateInstaller.state {
+        case .idle, .failed:
+            VStack(alignment: .leading, spacing: 6) {
+                HStack {
+                    Text("\(version) is available.").font(.netPulseCaption).foregroundStyle(Color.netPulsePrimary)
+                    Spacer()
+                    if let downloadURL {
+                        Button("Update Now") { appState.selfUpdateInstaller.update(from: downloadURL) }
+                    }
+                    Link(downloadURL == nil ? "Download" : "Release Notes", destination: releaseURL)
+                        .font(.netPulseCaption)
+                }
+                if case .failed(let message) = appState.selfUpdateInstaller.state {
+                    Text("Update failed: \(message)")
+                        .font(.netPulseCaption)
+                        .foregroundStyle(Color.netPulseError)
+                }
+            }
+
+        case .downloading:
+            HStack {
+                ProgressView().controlSize(.small)
+                Text("Downloading \(version)…").font(.netPulseCaption)
+            }
+
+        case .installing:
+            HStack {
+                ProgressView().controlSize(.small)
+                Text("Installing…").font(.netPulseCaption)
+            }
+
+        case .readyToRelaunch:
+            HStack {
+                Text("\(version) installed.").font(.netPulseCaption).foregroundStyle(Color.netPulseSuccess)
+                Spacer()
+                Button("Relaunch Now") { appState.selfUpdateInstaller.relaunch() }
             }
         }
     }

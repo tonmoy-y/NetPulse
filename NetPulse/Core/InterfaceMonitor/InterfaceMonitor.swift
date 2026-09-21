@@ -42,11 +42,45 @@ final class InterfaceMonitor: ObservableObject {
 
     func refresh() {
         let discovered = Self.discoverInterfaces()
+        let systemPrimaryName = Self.systemPrimaryInterfaceBSDName()
         DispatchQueue.main.async { [weak self] in
             guard let self else { return }
             self.interfaces = discovered
-            self.primaryInterface = PrimaryInterfaceSelector.choose(from: discovered)
+
+            // Prefer the interface macOS itself is actually routing default
+            // traffic through (same source System Settings > Network and
+            // `scutil --nwi` use) over our own isUp/kind heuristic. The
+            // heuristic alone picks phantom always-up interfaces that carry
+            // no real traffic — most commonly a Thunderbolt Bridge member
+            // (en1/en2/...), which macOS keeps "up" with a self-assigned
+            // link-local IPv6 address purely for peer-to-peer Thunderbolt
+            // networking, with zero cables connected and zero real use. That
+            // interface satisfied every condition our heuristic checked
+            // (isUp, isRunning, has an IPv6 address) and outranked real Wi-Fi
+            // by interface-kind priority (Ethernet > Wi-Fi), so throughput
+            // was being sampled from an interface that was never carrying
+            // the user's actual traffic — showing near-constant 0 B/s while
+            // still fully connected. Falls back to the heuristic only if the
+            // system has no default route to report (genuinely offline).
+            if let name = systemPrimaryName, let match = discovered.first(where: { $0.bsdName == name }) {
+                self.primaryInterface = match
+            } else {
+                self.primaryInterface = PrimaryInterfaceSelector.choose(from: discovered)
+            }
         }
+    }
+
+    /// Reads the BSD name of the interface macOS is actually using for its
+    /// default route, straight from the same SCDynamicStore key
+    /// `scutil --nwi` and System Settings > Network read.
+    private static func systemPrimaryInterfaceBSDName() -> String? {
+        guard let store = SCDynamicStoreCreate(nil, "com.netpulse.interfacemonitor" as CFString, nil, nil) else {
+            return nil
+        }
+        guard let global = SCDynamicStoreCopyValue(store, "State:/Network/Global/IPv4" as CFString) as? [String: Any] else {
+            return nil
+        }
+        return global["PrimaryInterface"] as? String
     }
 
     // MARK: - Discovery

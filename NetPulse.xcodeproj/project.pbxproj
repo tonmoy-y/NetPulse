@@ -21,6 +21,7 @@
 		3FD27650F98135540EF1CA3E /* PublicIPService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3DDF7CA259E5353FBF52298 /* PublicIPService.swift */; };
 		3FDFC6B338E65333871C5A9C /* DataUsageStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AD949D356FBCCE883E6D8FD /* DataUsageStore.swift */; };
 		40FDFBF6A09B291B6DBAFED0 /* SpeedTestService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 066485226F8F3EF86A379080 /* SpeedTestService.swift */; };
+		45628C124D578E98FAD80A62 /* SelfUpdateInstaller.swift in Sources */ = {isa = PBXBuildFile; fileRef = B33E79F1184B8D15E925B99D /* SelfUpdateInstaller.swift */; };
 		46F9A64932C5CD234376C309 /* MenuBarSettingsTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7FCF4746E0A949452A62774 /* MenuBarSettingsTab.swift */; };
 		4705CE57AB8EF3604BE3EC65 /* AlertsSettingsTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = B072A6C36B5F90CBD7F81985 /* AlertsSettingsTab.swift */; };
 		4F3F049F433528C15AC305CF /* PersistenceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408760726171DD39D3144CFF /* PersistenceController.swift */; };
@@ -71,6 +72,7 @@
 		A8630259032A8DFC9424A0F7 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		B072A6C36B5F90CBD7F81985 /* AlertsSettingsTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertsSettingsTab.swift; sourceTree = "<group>"; };
 		B21EB8D94D02D57E4779B3F8 /* NetworkSettingsTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkSettingsTab.swift; sourceTree = "<group>"; };
+		B33E79F1184B8D15E925B99D /* SelfUpdateInstaller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelfUpdateInstaller.swift; sourceTree = "<group>"; };
 		B3DDF7CA259E5353FBF52298 /* PublicIPService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublicIPService.swift; sourceTree = "<group>"; };
 		B62D9D2EA6843F359F9CB7B7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		BFBD73EB995724667AD6BB72 /* TrafficGraphView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrafficGraphView.swift; sourceTree = "<group>"; };
@@ -140,6 +142,7 @@
 			isa = PBXGroup;
 			children = (
 				B3DDF7CA259E5353FBF52298 /* PublicIPService.swift */,
+				B33E79F1184B8D15E925B99D /* SelfUpdateInstaller.swift */,
 				4BAEA50FC9D7966EFD2E17F6 /* UpdateChecker.swift */,
 			);
 			path = Services;
@@ -443,6 +446,7 @@
 				DAEE8ABCFB7CEEDA22A98CA1 /* PrivacySettingsTab.swift in Sources */,
 				3FD27650F98135540EF1CA3E /* PublicIPService.swift in Sources */,
 				0954AA236762E9BB2E577790 /* QualityBadge.swift in Sources */,
+				45628C124D578E98FAD80A62 /* SelfUpdateInstaller.swift in Sources */,
 				BF09D5407901BC99F20F7469 /* SettingsView.swift in Sources */,
 				B40CE2D840481E92D6AD2028 /* SpeedTestPanel.swift in Sources */,
 				40FDFBF6A09B291B6DBAFED0 /* SpeedTestService.swift in Sources */,
@@ -476,7 +480,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 2.0.0;
+				MARKETING_VERSION = 2.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.tonmoysarkersourav.netpulse;
 				PRODUCT_NAME = NetPulse;
 				SDKROOT = macosx;
@@ -567,7 +571,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 2.0.0;
+				MARKETING_VERSION = 2.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.tonmoysarkersourav.netpulse;
 				PRODUCT_NAME = NetPulse;
 				SDKROOT = macosx;

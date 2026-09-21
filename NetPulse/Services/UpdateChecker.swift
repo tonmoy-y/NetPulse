@@ -5,14 +5,15 @@ enum UpdateCheckState: Equatable {
     case idle
     case checking
     case upToDate(checkedAt: Date)
-    case updateAvailable(version: String, releaseURL: URL)
+    case updateAvailable(version: String, releaseURL: URL, downloadURL: URL?)
     case failed(String)
 
     static func == (lhs: UpdateCheckState, rhs: UpdateCheckState) -> Bool {
         switch (lhs, rhs) {
         case (.idle, .idle), (.checking, .checking): return true
         case (.upToDate, .upToDate): return true
-        case (.updateAvailable(let a, let au), .updateAvailable(let b, let bu)): return a == b && au == bu
+        case (.updateAvailable(let a, let au, let ad), .updateAvailable(let b, let bu, let bd)):
+            return a == b && au == bu && ad == bd
         case (.failed(let a), .failed(let b)): return a == b
         default: return false
         }
@@ -23,9 +24,11 @@ enum UpdateCheckState: Equatable {
 /// only "phone home" beyond the opt-in public IP lookup and manual speed
 /// test — it sends a single anonymous GET to the public GitHub API (no
 /// identifying data, no analytics payload) and can be turned off entirely
-/// in Settings → General. It never downloads or installs anything itself;
-/// it just tells you a new version exists and links to the release page,
-/// where the existing "Publishing a release" / Homebrew tap flow takes over.
+/// in Settings → General.
+///
+/// When a newer release's DMG asset can be found, this also exposes its
+/// direct download URL so `SelfUpdateInstaller` can install it in-app
+/// instead of just linking out to the release page.
 @MainActor
 final class UpdateChecker: ObservableObject {
     @Published private(set) var state: UpdateCheckState = .idle
@@ -54,8 +57,10 @@ final class UpdateChecker: ObservableObject {
 
                 let payload = try JSONDecoder().decode(GitHubRelease.self, from: data)
                 if VersionComparator.isNewer(payload.tagName, than: currentVersion),
-                   let url = URL(string: payload.htmlURL) {
-                    state = .updateAvailable(version: payload.tagName, releaseURL: url)
+                   let releaseURL = URL(string: payload.htmlURL) {
+                    let dmgAsset = payload.assets.first { $0.name.hasSuffix(".dmg") }
+                    let downloadURL = dmgAsset.flatMap { URL(string: $0.browserDownloadURL) }
+                    state = .updateAvailable(version: payload.tagName, releaseURL: releaseURL, downloadURL: downloadURL)
                 } else {
                     state = .upToDate(checkedAt: Date())
                 }
@@ -68,10 +73,22 @@ final class UpdateChecker: ObservableObject {
     private struct GitHubRelease: Decodable {
         let tagName: String
         let htmlURL: String
+        let assets: [GitHubReleaseAsset]
 
         enum CodingKeys: String, CodingKey {
             case tagName = "tag_name"
             case htmlURL = "html_url"
+            case assets
+        }
+    }
+
+    private struct GitHubReleaseAsset: Decodable {
+        let name: String
+        let browserDownloadURL: String
+
+        enum CodingKeys: String, CodingKey {
+            case name
+            case browserDownloadURL = "browser_download_url"
         }
     }
 }
