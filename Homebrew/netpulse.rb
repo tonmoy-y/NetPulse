@@ -7,11 +7,11 @@ cask "netpulse" do
   desc "Lightweight, privacy-first network speed monitor for the macOS menu bar"
   homepage "https://github.com/tonmoy-y/NetPulse"
 
-  depends_on macos: ">= :ventura"
+  depends_on macos: :ventura
 
   app "NetPulse.app"
 
-  postflight do
+  postflight_steps do
     # NetPulse is ad-hoc signed, not notarized with a paid Apple Developer
     # ID. Clearing quarantine here is the Homebrew-standard equivalent of
     # the one-time Right-click → Open step a manual .dmg install needs.
