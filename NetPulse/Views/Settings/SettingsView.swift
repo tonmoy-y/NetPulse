@@ -33,11 +33,11 @@ struct SettingsView: View {
             AboutTab()
                 .tabItem { Label("About", systemImage: "info.circle") }
         }
-        // 460pt was too narrow for all 10 tabs to show inline — the last
-        // four (Alerts, Privacy, Advanced, About) were getting pushed into
-        // a "»" overflow menu, which reads as "disabled" at a glance even
-        // though every tab behind it works fine. Wide enough to fit all 10
-        // tab items without that overflow.
-        .frame(width: 760, height: 460)
+        // An exact .frame(width:height:) locks the window to that fixed
+        // size — no resize handles at all. minWidth/maxWidth (and height)
+        // instead gives a sensible default that fits all 10 tabs without
+        // the "»" overflow menu, while leaving the window freely resizable.
+        .frame(minWidth: 700, idealWidth: 760, maxWidth: .infinity,
+               minHeight: 420, idealHeight: 460, maxHeight: .infinity)
     }
 }
