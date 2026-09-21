@@ -1,39 +1,29 @@
 import SwiftUI
 
+/// Tab switching is driven by a real NSToolbar (see SettingsWindowController)
+/// rather than SwiftUI's TabView. TabView's own tab bar has no native
+/// overflow handling outside of an actual `Settings` scene — with 10 tabs at
+/// a normal window width it was truncating the trailing tabs with no way to
+/// reach them at all. NSToolbar gets AppKit's real, native overflow chevron
+/// for free, the same mechanism System Settings itself uses.
 struct SettingsView: View {
+    @EnvironmentObject private var tabSelection: SettingsTabSelection
+
     var body: some View {
-        TabView {
-            GeneralSettingsTab()
-                .tabItem { Label("General", systemImage: "gearshape") }
-
-            MenuBarSettingsTab()
-                .tabItem { Label("Menu Bar", systemImage: "menubar.rectangle") }
-
-            NetworkSettingsTab()
-                .tabItem { Label("Network", systemImage: "network") }
-
-            GraphSettingsTab()
-                .tabItem { Label("Graph", systemImage: "chart.xyaxis.line") }
-
-            DataUsageSettingsTab()
-                .tabItem { Label("Data Usage", systemImage: "chart.pie") }
-
-            LatencySettingsTab()
-                .tabItem { Label("Latency", systemImage: "timer") }
-
-            AlertsSettingsTab()
-                .tabItem { Label("Alerts", systemImage: "bell") }
-
-            PrivacySettingsTab()
-                .tabItem { Label("Privacy", systemImage: "hand.raised") }
-
-            AdvancedSettingsTab()
-                .tabItem { Label("Advanced", systemImage: "slider.horizontal.3") }
-
-            AboutTab()
-                .tabItem { Label("About", systemImage: "info.circle") }
+        Group {
+            switch tabSelection.selected {
+            case .general: GeneralSettingsTab()
+            case .menuBar: MenuBarSettingsTab()
+            case .network: NetworkSettingsTab()
+            case .graph: GraphSettingsTab()
+            case .dataUsage: DataUsageSettingsTab()
+            case .latency: LatencySettingsTab()
+            case .alerts: AlertsSettingsTab()
+            case .privacy: PrivacySettingsTab()
+            case .advanced: AdvancedSettingsTab()
+            case .about: AboutTab()
+            }
         }
-        // Sizing and resizability are owned by the real NSWindow in
-        // SettingsWindowController now, not by a frame modifier here.
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
