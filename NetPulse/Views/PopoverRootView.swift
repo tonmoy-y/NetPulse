@@ -22,6 +22,14 @@ struct PopoverRootView: View {
                 }
             }
             .pickerStyle(.segmented)
+            // Explicit tint instead of leaving the segmented control's
+            // selection highlight to the ambient system accent color: that
+            // color is resolved from a dynamic NSColor tied to the window's
+            // appearance, which is reported to briefly show the wrong value
+            // right after a MenuBarExtra popover first appears and only
+            // self-correct once some unrelated AppKit event forces a
+            // recompute — this pins it to the brand color from frame one.
+            .tint(Color.netPulsePrimary)
             .padding(.horizontal, 14)
             .padding(.top, 10)
 

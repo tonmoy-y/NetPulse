@@ -10,23 +10,45 @@ final class TrafficSampler: ObservableObject {
     @Published private(set) var recentSamples: [NetworkSample] = []
 
     private var timer: DispatchSourceTimer?
-    private var previousReading: InterfaceCounterReading?
-    private var previousBsdName: String?
     private let maxRetainedSamples = 3600 // enough for the 1-hour graph window at 1s resolution
+
+    // The counter reading a sample is measured FROM, and the interface it
+    // was taken on. We deliberately do NOT diff every tick against the
+    // immediately-previous tick: macOS updates an interface's if_data byte
+    // counters in batches rather than continuously, so at fast refresh
+    // intervals (100-500ms) a large fraction of ticks would see literally
+    // no change since the last poll and report a spurious 0 B/s even while
+    // real traffic is flowing — the counter just hadn't been updated yet.
+    // Instead we keep a baseline and only compute+publish a new sample once
+    // at least `minimumSampleWindow` has elapsed since it, so every
+    // published sample spans enough wall-clock time to reliably observe a
+    // real counter update.
+    private var windowStart: InterfaceCounterReading?
+    private var windowStartName: String?
+    private let minimumSampleWindow: TimeInterval = 1.0
+
+    // Once Auto mode has locked onto a real primary interface, keep using
+    // it even if InterfaceMonitor's primary-interface detection transiently
+    // reports nil (e.g. a momentary isRunning flicker) — otherwise the
+    // sampler would keep bouncing onto the full-interface aggregate, whose
+    // very different baseline causes exactly the false-zero clamp this
+    // whole windowing scheme exists to avoid. A genuine interface switch
+    // (Wi-Fi -> Ethernet) still updates this immediately, since
+    // primaryInterfaceProvider only returns nil, never a stale name.
+    private var lastKnownPrimaryName: String?
 
     var interfaceSelection: InterfaceSelectionMode = .auto
     var isPaused: Bool = false
 
     /// Supplies the BSD name of the currently-primary interface (the same
     /// one InterfaceMonitor shows as "Interface" in the popup) for Auto
-    /// mode. Set by AppState. If nil (e.g. briefly at launch before the
-    /// first interface scan completes), Auto mode falls back to summing all
-    /// non-virtual interfaces rather than reporting nothing.
+    /// mode. Set by AppState.
     var primaryInterfaceProvider: (() -> String?)?
 
     func start(interval: TimeInterval) {
         stop()
-        previousReading = nil
+        windowStart = nil
+        windowStartName = nil
 
         let queue = DispatchQueue(label: "com.netpulse.trafficsampler", qos: .utility)
         let source = DispatchSource.makeTimerSource(queue: queue)
@@ -57,20 +79,12 @@ final class TrafficSampler: ObservableObject {
 
         switch interfaceSelection {
         case .auto:
-            // Track ONE real interface's counters, not a sum across every
-            // interface getifaddrs reports. macOS surfaces a churn of
-            // ephemeral pseudo-interfaces (awdl0, llw0, bridge100, utun*,
-            // ap1, ...) that flap up/down independently of real traffic;
-            // summing them made the aggregate occasionally dip below its
-            // previous value between ticks, which ThroughputCalculator
-            // clamps to a false 0 B/s. Following the same single interface
-            // InterfaceMonitor already identified as primary avoids that
-            // entirely and keeps the menu bar in sync with the interface
-            // name shown in the popup.
-            if let primaryName = primaryInterfaceProvider?(),
-               let match = allCounters.first(where: { $0.bsdName == primaryName }) {
+            if let primaryName = primaryInterfaceProvider?() {
+                lastKnownPrimaryName = primaryName
+            }
+            if let name = lastKnownPrimaryName, let match = allCounters.first(where: { $0.bsdName == name }) {
                 raw = match
-                selectedName = primaryName
+                selectedName = name
             } else {
                 raw = InterfaceCounterReader.aggregate(allCounters)
                 selectedName = "auto"
@@ -88,17 +102,23 @@ final class TrafficSampler: ObservableObject {
         let now = Date()
         let currentReading = InterfaceCounterReading(timestamp: now, bytesReceived: raw.bytesReceived, bytesSent: raw.bytesSent)
 
-        defer {
-            previousReading = currentReading
-            previousBsdName = selectedName
-        }
-
-        // If the underlying interface changed (e.g. Wi-Fi -> Ethernet switch),
-        // discard the stale baseline rather than reporting a bogus spike.
-        guard let previous = previousReading, previousBsdName == selectedName,
-              let sample = ThroughputCalculator.sample(previous: previous, current: currentReading) else {
+        // The interface we're tracking changed (real switch, or the
+        // aggregate<->single-interface fallback kicked in) — reset the
+        // baseline rather than diffing across two different counter spaces.
+        guard windowStartName == selectedName, let start = windowStart else {
+            windowStart = currentReading
+            windowStartName = selectedName
             return
         }
+
+        let elapsed = now.timeIntervalSince(start.timestamp)
+        guard elapsed >= minimumSampleWindow,
+              let sample = ThroughputCalculator.sample(previous: start, current: currentReading) else {
+            return
+        }
+
+        // Slide the window forward: this sample's end becomes the next one's start.
+        windowStart = currentReading
 
         DispatchQueue.main.async { [weak self] in
             guard let self else { return }
