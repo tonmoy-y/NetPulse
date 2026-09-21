@@ -17,6 +17,11 @@ public struct DailyUsage: Codable, Equatable, Identifiable {
 public struct DataUsageTotals: Equatable {
     public let downloadedBytes: UInt64
     public let uploadedBytes: UInt64
+
+    public init(downloadedBytes: UInt64, uploadedBytes: UInt64) {
+        self.downloadedBytes = downloadedBytes
+        self.uploadedBytes = uploadedBytes
+    }
 }
 
 /// Pure aggregation logic over a day-keyed ledger. Persistence and calendar
