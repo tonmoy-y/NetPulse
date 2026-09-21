@@ -31,6 +31,7 @@ webviews, and no background telemetry.
 - **Alerts** — native macOS notifications for download/upload thresholds, latency, packet loss, and connection loss/restore, each with its own cooldown so you're never spammed.
 - **Manual speed test** — never runs automatically; measures against Cloudflare's public, documented speed-test endpoints and clearly discloses that it consumes bandwidth.
 - **Optional public IP lookup** — off by default, one external request only when you explicitly enable it.
+- **Update checks** — checks GitHub Releases for a newer version (a single anonymous request, no analytics), automatically on launch by default or on demand from Settings → General; it only tells you a new version exists and links to it, it never downloads or installs anything itself. Can be turned off entirely.
 
 ## Privacy
 
@@ -42,7 +43,7 @@ detection, local IP info, statistics, graphs, and data usage. There is:
 
 ## Screenshots
 
-_Not included yet. CI has now actually compiled and run this app (see [v1.0.0](https://github.com/tonmoy-y/NetPulse/releases/tag/v1.0.0)), but that's a headless build on a CI runner — nobody has opened the running app on a display yet to capture screenshots, since this was built from an environment with no macOS GUI. Install it (see below), then drop images in `docs/` (e.g. `docs/screenshot-menubar.png`, `docs/screenshot-popup.png`, `docs/screenshot-settings.png`) and reference them here._
+_Not included yet. [v1.0.1](https://github.com/tonmoy-y/NetPulse/releases/tag/v1.0.1) has actually been installed and launched (via the real Homebrew cask) and confirmed to run without crashing, via process/log inspection — but that verification had no Accessibility/screen-recording access to interact with or screenshot the UI itself. Install it (see below), then drop images in `docs/` (e.g. `docs/screenshot-menubar.png`, `docs/screenshot-popup.png`, `docs/screenshot-settings.png`) and reference them here._
 
 ## Installation
 
@@ -53,7 +54,9 @@ brew tap tonmoy-y/netpulse
 brew install --cask netpulse
 ```
 
-This installs from the [tonmoy-y/homebrew-netpulse](https://github.com/tonmoy-y/homebrew-netpulse) tap, which is real and live — it points at the actual [v1.0.0 release DMG](https://github.com/tonmoy-y/NetPulse/releases/tag/v1.0.0) with its real checksum, built by this repo's own CI, and was verified end-to-end (`brew tap` → `brew install --cask netpulse` → app in `/Applications`) before being documented here. The cask also clears the Gatekeeper quarantine flag automatically, so unlike a manual `.dmg` install there's no right-click-to-open step needed.
+This installs from the [tonmoy-y/homebrew-netpulse](https://github.com/tonmoy-y/homebrew-netpulse) tap, which is real and live — it points at the actual [v1.0.1 release DMG](https://github.com/tonmoy-y/NetPulse/releases/tag/v1.0.1) with its real checksum, built by this repo's own CI, and was verified end-to-end (`brew tap` → `brew install --cask netpulse` → app launched and confirmed running via process/log inspection) before being documented here. The cask also clears the Gatekeeper quarantine flag automatically, so unlike a manual `.dmg` install there's no right-click-to-open step needed.
+
+> **If you installed before this note was added and hit "Invalid cask" / "undefined local variable or method 'appdir'":** that was a real regression in an earlier commit's cask, now fixed. Run `brew update`, then `brew upgrade --cask netpulse` (or `brew untap tonmoy-y/netpulse && brew tap tonmoy-y/netpulse && brew install --cask netpulse` for a clean slate) to pick up the fix — Homebrew taps don't auto-refresh without `brew update`.
 
 > If your Homebrew shows `Refusing to load cask ... from untrusted tap` (a newer Homebrew tap-trust safeguard for third-party taps), run `brew trust --cask tonmoy-y/netpulse/netpulse` once and re-run the install command.
 
@@ -205,8 +208,8 @@ Release build, packages it as a `.dmg`, and — when triggered by a version
 tag — attaches it to a GitHub Release automatically.
 
 ```bash
-git tag v1.0.0
-git push origin v1.0.0
+git tag v1.0.2
+git push origin v1.0.2
 ```
 
 That's it; watch the **Actions** tab, and the `.dmg` shows up on the

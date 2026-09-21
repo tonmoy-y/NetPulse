@@ -1,6 +1,6 @@
 cask "netpulse" do
-  version "1.0.0"
-  sha256 "4fa16dc826fcb58147a67a0fd0d42598103a8337a9cb1b8c3ea43c74a39840a9"
+  version "1.0.1"
+  sha256 "da0e45a281de0c72ebdbe19cc17040a06863f5122b72afb6a216ddd3863e9b68"
 
   url "https://github.com/tonmoy-y/NetPulse/releases/download/v#{version}/NetPulse-#{version}.dmg"
   name "NetPulse"
