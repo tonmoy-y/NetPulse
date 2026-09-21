@@ -33,11 +33,12 @@ struct SettingsView: View {
             AboutTab()
                 .tabItem { Label("About", systemImage: "info.circle") }
         }
-        // An exact .frame(width:height:) locks the window to that fixed
-        // size — no resize handles at all. minWidth/maxWidth (and height)
-        // instead gives a sensible default that fits all 10 tabs without
-        // the "»" overflow menu, while leaving the window freely resizable.
-        .frame(minWidth: 700, idealWidth: 760, maxWidth: .infinity,
-               minHeight: 420, idealHeight: 460, maxHeight: .infinity)
+        // Same default size as before (460x420) — the point isn't a wider
+        // default, it's that .frame(width:height:) with exact values locks
+        // the window with no resize handles at all. minWidth/maxWidth (and
+        // height) keeps the original look but lets you drag it wider
+        // yourself if the "»" tab overflow menu bothers you.
+        .frame(minWidth: 460, idealWidth: 460, maxWidth: .infinity,
+               minHeight: 420, idealHeight: 420, maxHeight: .infinity)
     }
 }
