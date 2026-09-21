@@ -1,0 +1,30 @@
+# Xcode
+build/
+DerivedData/
+*.xcodeproj/xcuserdata/
+*.xcworkspace/xcuserdata/
+*.xcuserstate
+xcuserdata/
+*.moved-aside
+*.pbxuser
+*.perspectivev3
+
+# NetPulse.xcodeproj is committed for convenience (open it directly), but
+# project.yml is the source of truth — run `xcodegen generate` after editing
+# it or after adding/removing source files, then commit the regenerated project.
+
+# Swift Package Manager
+.build/
+.swiftpm/
+NetPulseCore/.build/
+NetPulseCore/.swiftpm/
+Package.resolved
+
+# macOS
+.DS_Store
+
+# Distribution
+*.dmg
+*.app
+*.ipa
+notarization-log.json

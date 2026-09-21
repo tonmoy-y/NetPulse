@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!--
+	NetPulse is NOT App Sandboxed. It reads interface byte counters via
+	getifaddrs and shells out to the system /sbin/ping for latency, neither of
+	which is permitted for a sandboxed process. It is distributed directly
+	(Developer ID + notarization) and via Homebrew, not the Mac App Store, so
+	sandboxing is not required. Hardened Runtime is still fully enabled at
+	the build-settings level (ENABLE_HARDENED_RUNTIME = YES).
+	-->
+	<key>com.apple.security.network.client</key>
+	<true/>
+</dict>
+</plist>
