@@ -31,6 +31,11 @@ final class SettingsWindowController: NSWindowController, NSWindowDelegate {
         let window = NSWindow(contentViewController: hosting)
         window.styleMask = [.titled, .closable, .miniaturizable, .resizable]
         window.title = "NetPulse Settings"
+        // Match the native "Preferences pane" look SwiftUI's Settings scene
+        // gets for free (transparent, unified title bar) — a plain NSWindow
+        // otherwise renders as a generic opaque-titlebar window instead.
+        window.titlebarAppearsTransparent = true
+        window.toolbarStyle = .preference
         window.setContentSize(NSSize(width: 460, height: 420))
         window.minSize = NSSize(width: 460, height: 420)
         window.isReleasedWhenClosed = false
