@@ -42,19 +42,29 @@ detection, local IP info, statistics, graphs, and data usage. There is:
 
 ## Screenshots
 
-_Add screenshots here once you've built the app — e.g. `docs/screenshot-menubar.png`, `docs/screenshot-popup.png`, `docs/screenshot-settings.png`._
+_Not included yet — this project was built and pushed from an environment with no full Xcode install and no macOS GUI to run the app in, so no one has actually run it yet to capture screenshots. Once you've built it (see below) or a tagged release has run through CI, drop images in `docs/` (e.g. `docs/screenshot-menubar.png`, `docs/screenshot-popup.png`, `docs/screenshot-settings.png`) and reference them here._
 
 ## Installation
 
-### Homebrew (once released)
+### Option A — Download the .dmg (no Xcode needed)
+
+1. Go to **[Releases](../../releases)** and download the latest `NetPulse-*.dmg`.
+   - No release has been tagged yet in this repo — see [Publishing a release](#publishing-a-release) below to produce the first one. `.github/workflows/release.yml` builds it automatically on a real macOS CI runner (this repo's own dev environment can't compile it — no full Xcode installed there).
+2. Open the `.dmg` and drag **NetPulse.app** into **Applications**.
+3. **First launch only:** NetPulse is ad-hoc signed, not notarized with a paid Apple Developer ID, so Gatekeeper will say it "cannot be verified." Right-click (Control-click) **NetPulse.app** → **Open** → **Open** again. You only need to do this once; after that it opens normally, including via Launchpad/Spotlight.
+4. NetPulse appears in the menu bar — it has **no Dock icon** and **no window** to look for.
+
+> Genuinely warning-free (no right-click-to-open step) requires signing with a **paid Apple Developer ID** ($99/year) and notarizing with `notarytool` — see [Archive & notarize](#archive--notarize-developer-id) if you have one. Without it, the right-click-once step above is unavoidable for any indie-built Mac app, not specific to NetPulse.
+
+### Option B — Homebrew (once a release exists)
 
 ```bash
 brew install --cask netpulse
 ```
 
-A cask definition is included at [`Homebrew/netpulse.rb`](Homebrew/netpulse.rb) — nothing is published automatically; you publish it to a tap when you're ready.
+This requires publishing [`Homebrew/netpulse.rb`](Homebrew/netpulse.rb) to a tap (or `homebrew/cask` itself) pointing at a real release asset — it is **not** published anywhere yet. See [Publishing a release](#publishing-a-release).
 
-### Build from source
+### Option C — Build from source
 
 See [Build Instructions](#build-instructions) below.
 
@@ -144,6 +154,9 @@ swift test
    ```
 4. Select the **NetPulse** scheme and **Run** (⌘R). Requires Xcode 15+ and macOS 13 Ventura or newer.
 
+> **If Xcode complains "Signing for 'NetPulse' requires a development team":**
+> `project.yml` ships with ad-hoc signing (`CODE_SIGN_IDENTITY: "-"`) specifically so a fresh clone builds and runs immediately with no Apple ID configured. If you still hit this, you likely have a stale generated project — delete `NetPulse.xcodeproj` and re-run `xcodegen generate`. (If you *want* Automatic signing with your own Apple ID instead, change it in Xcode's Signing & Capabilities tab after generating, or edit the `CODE_SIGN_*` keys in `project.yml`.)
+
 ### Release build
 
 ```bash
@@ -179,6 +192,28 @@ none are hardcoded in this project.
 hdiutil create -volname "NetPulse" -srcfolder build/export/NetPulse.app \
   -ov -format UDZO NetPulse-1.0.0.dmg
 ```
+
+### Publishing a release
+
+The easiest path — and the one **Option A** above depends on — is automated:
+[`.github/workflows/release.yml`](.github/workflows/release.yml) runs on a
+real macOS GitHub Actions runner (full Xcode, unlike this repo's own dev
+environment), runs the `NetPulseCore` test suite, builds an ad-hoc-signed
+Release build, packages it as a `.dmg`, and — when triggered by a version
+tag — attaches it to a GitHub Release automatically.
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+That's it; watch the **Actions** tab, and the `.dmg` shows up on the
+**Releases** page a few minutes later. You can also trigger a build without
+tagging via the workflow's **Run workflow** button (Actions → Build NetPulse
+DMG → Run workflow) to get an artifact without publishing a release.
+
+Once a release exists, update `Homebrew/netpulse.rb`'s `sha256` (from
+`shasum -a 256 NetPulse-*.dmg`) before publishing the cask to a tap.
 
 ## License
 

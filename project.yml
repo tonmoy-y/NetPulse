@@ -31,9 +31,19 @@ targets:
         SWIFT_VERSION: "5.0"
         MACOSX_DEPLOYMENT_TARGET: "13.0"
         ENABLE_HARDENED_RUNTIME: YES
-        CODE_SIGN_STYLE: Automatic
-        DEVELOPMENT_TEAM: ""
         GENERATE_INFOPLIST_FILE: NO
+        # Ad-hoc signing by default so `open NetPulse.xcodeproj` + Run just
+        # works with no Apple ID / paid developer account needed — Xcode's
+        # "Automatic" signing style fails with "requires a development team"
+        # unless you've added an account, which is the #1 cause of a fresh
+        # clone not building. If you DO have a Developer ID and want to
+        # notarize for distribution outside this repo's CI, override these
+        # per-scheme in Xcode's Signing & Capabilities instead of editing here.
+        CODE_SIGN_STYLE: Manual
+        CODE_SIGN_IDENTITY: "-"
+        CODE_SIGNING_REQUIRED: NO
+        CODE_SIGNING_ALLOWED: YES
+        DEVELOPMENT_TEAM: ""
     dependencies:
       - package: NetPulseCore
         product: NetPulseCore

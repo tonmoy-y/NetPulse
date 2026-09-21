@@ -1,0 +1,82 @@
+name: Build NetPulse DMG
+
+# Builds NetPulse on a real macOS runner (this repo's own dev environment
+# only has the Xcode Command Line Tools, not full Xcode, so this workflow is
+# the actual compiler check for the project) and produces a double-clickable
+# .dmg. Push a tag like "v1.0.0" to also attach it to a GitHub Release.
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode.app
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Run NetPulseCore unit tests
+        run: |
+          cd NetPulseCore
+          swift test
+
+      - name: Build Release (ad-hoc signed, no Apple ID required)
+        run: |
+          xcodebuild \
+            -project NetPulse.xcodeproj \
+            -scheme NetPulse \
+            -configuration Release \
+            -derivedDataPath build \
+            CODE_SIGN_IDENTITY="-" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=YES \
+            clean build
+
+      - name: Package .dmg
+        run: |
+          set -euo pipefail
+          APP_PATH="build/Build/Products/Release/NetPulse.app"
+          test -d "$APP_PATH"
+
+          VERSION="${GITHUB_REF_NAME#v}"
+          if [ "$VERSION" = "$GITHUB_REF_NAME" ]; then VERSION="dev"; fi
+
+          STAGING="dmg-staging"
+          rm -rf "$STAGING" && mkdir -p "$STAGING"
+          cp -R "$APP_PATH" "$STAGING/NetPulse.app"
+          ln -s /Applications "$STAGING/Applications"
+
+          DMG_NAME="NetPulse-${VERSION}.dmg"
+          hdiutil create -volname "NetPulse" -srcfolder "$STAGING" -ov -format UDZO "$DMG_NAME"
+          echo "DMG_NAME=$DMG_NAME" >> "$GITHUB_ENV"
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: NetPulse-dmg
+          path: ${{ env.DMG_NAME }}
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ env.DMG_NAME }}
+          generate_release_notes: true
+          body: |
+            NetPulse is ad-hoc signed, not notarized with a paid Apple
+            Developer ID. On first launch, macOS Gatekeeper will say it
+            "cannot be verified" — right-click (or Control-click) NetPulse.app
+            in Applications and choose **Open**, then confirm **Open** again.
+            You only need to do this once.
