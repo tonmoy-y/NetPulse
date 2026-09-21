@@ -16,9 +16,8 @@ struct NetPulseApp: App {
         }
         .menuBarExtraStyle(.window)
 
-        Settings {
-            SettingsView()
-                .environmentObject(appState)
-        }
+        // No SwiftUI `Settings` scene here — SettingsWindowController owns
+        // that window directly with AppKit so it's genuinely resizable
+        // (see its doc comment for why).
     }
 }

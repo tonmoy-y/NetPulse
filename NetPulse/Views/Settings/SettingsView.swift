@@ -33,12 +33,7 @@ struct SettingsView: View {
             AboutTab()
                 .tabItem { Label("About", systemImage: "info.circle") }
         }
-        // Same default size as before (460x420) — the point isn't a wider
-        // default, it's that .frame(width:height:) with exact values locks
-        // the window with no resize handles at all. minWidth/maxWidth (and
-        // height) keeps the original look but lets you drag it wider
-        // yourself if the "»" tab overflow menu bothers you.
-        .frame(minWidth: 460, idealWidth: 460, maxWidth: .infinity,
-               minHeight: 420, idealHeight: 420, maxHeight: .infinity)
+        // Sizing and resizability are owned by the real NSWindow in
+        // SettingsWindowController now, not by a frame modifier here.
     }
 }

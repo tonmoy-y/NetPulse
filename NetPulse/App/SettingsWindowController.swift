@@ -1,0 +1,35 @@
+import SwiftUI
+import AppKit
+
+/// Owns the Settings window directly with AppKit instead of going through
+/// SwiftUI's `Settings` scene. The `Settings` scene has a long-standing,
+/// well-documented limitation: it frequently ignores `.frame(minWidth:...)`
+/// resizability hints entirely and locks the window to a fixed size
+/// regardless — which is exactly the "window isn't resizable" bug that kept
+/// coming back no matter what frame modifiers were tried. Managing the
+/// window ourselves means resizability is a plain, explicit `styleMask`
+/// flag we control directly, not something left to SwiftUI scene behavior.
+@MainActor
+final class SettingsWindowController: NSWindowController, NSWindowDelegate {
+    static let shared = SettingsWindowController()
+
+    private convenience init() {
+        let hosting = NSHostingController(rootView: SettingsView().environmentObject(AppState.shared))
+
+        let window = NSWindow(contentViewController: hosting)
+        window.styleMask = [.titled, .closable, .miniaturizable, .resizable]
+        window.title = "NetPulse Settings"
+        window.setContentSize(NSSize(width: 460, height: 420))
+        window.minSize = NSSize(width: 460, height: 420)
+        window.isReleasedWhenClosed = false
+        window.center()
+
+        self.init(window: window)
+        window.delegate = self
+    }
+
+    func show() {
+        NSApp.activate(ignoringOtherApps: true)
+        window?.makeKeyAndOrderFront(nil)
+    }
+}

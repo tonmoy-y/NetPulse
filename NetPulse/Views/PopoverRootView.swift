@@ -76,7 +76,9 @@ struct PopoverRootView: View {
 
             Spacer()
 
-            settingsButton
+            Button("Settings…") { SettingsWindowController.shared.show() }
+                .buttonStyle(.link)
+                .font(.netPulseSecondary)
 
             Button("Quit") { NSApp.terminate(nil) }
                 .buttonStyle(.link)
@@ -84,27 +86,5 @@ struct PopoverRootView: View {
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 8)
-    }
-
-    // `SettingsLink` (macOS 14+) is the only reliable way to open the
-    // SwiftUI Settings scene from outside it — confirmed the hard way: the
-    // previous `NSApp.sendAction(Selector(("showSettingsWindow:")), ...)`
-    // hack logs a `fault`-level runtime-issues warning ("Please use
-    // SettingsLink for opening the Settings scene") and does not reliably
-    // open the window on current macOS. Deployment target for this file's
-    // behavior is effectively 14+; 13 falls back to the old best-effort hack.
-    @ViewBuilder
-    private var settingsButton: some View {
-        if #available(macOS 14.0, *) {
-            SettingsLink {
-                Text("Settings…")
-            }
-            .buttonStyle(.link)
-            .font(.netPulseSecondary)
-        } else {
-            Button("Settings…") { AppWindowRouter.openSettings() }
-                .buttonStyle(.link)
-                .font(.netPulseSecondary)
-        }
     }
 }

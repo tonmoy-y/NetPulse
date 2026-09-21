@@ -32,6 +32,7 @@
 		9B27BBE650C1FD84F9899241 /* AboutTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DE4B9E3ACEA55C6A2024833 /* AboutTab.swift */; };
 		9E9F85A392BA54CF2F7B8E96 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B62D9D2EA6843F359F9CB7B7 /* Assets.xcassets */; };
 		A4A551186839D947F9160519 /* NetPulseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 96ADBEBF0C75EC803E916239 /* NetPulseCore */; };
+		A50AA6A301DF7A5B218192CE /* SettingsWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AA55CDB6D71560F514C8ABB /* SettingsWindowController.swift */; };
 		B265868938D4E157F0F7E231 /* Font+Brand.swift in Sources */ = {isa = PBXBuildFile; fileRef = D60B6802F9B15BF933F20250 /* Font+Brand.swift */; };
 		B3930CCB0C6068178F170F5E /* TrafficSampler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 608E96A1786E8A69EBD99555 /* TrafficSampler.swift */; };
 		B40CE2D840481E92D6AD2028 /* SpeedTestPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8468A4B94263CD9C0BE9D019 /* SpeedTestPanel.swift */; };
@@ -45,7 +46,6 @@
 		DD0B64ADA320F8E0213AFF09 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = C46519C5B5E0E3E0D6914453 /* AppDelegate.swift */; };
 		E6BA20C93378AC2795356AD0 /* AlertEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A0C5248A3EDDA4FF320FDD9 /* AlertEngine.swift */; };
 		EB90D37A6BA4CA6B60251159 /* NetworkSettingsTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = B21EB8D94D02D57E4779B3F8 /* NetworkSettingsTab.swift */; };
-		F08CE66522D03D8BD36D72A3 /* AppWindowRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6CEF82E17C828F70639F765F /* AppWindowRouter.swift */; };
 		FB9765AA98998691E6A9F572 /* OverviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F0549445F2EFF0B1D5B6CFB /* OverviewView.swift */; };
 		FBE9B73DE8766FBA9BB510DA /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB35841A9DB537F76F0D7773 /* AppState.swift */; };
 /* End PBXBuildFile section */
@@ -63,7 +63,7 @@
 		4BAEA50FC9D7966EFD2E17F6 /* UpdateChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateChecker.swift; sourceTree = "<group>"; };
 		608E96A1786E8A69EBD99555 /* TrafficSampler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrafficSampler.swift; sourceTree = "<group>"; };
 		64D3CBE9211F53A57ED6116A /* NetPulse.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NetPulse.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		6CEF82E17C828F70639F765F /* AppWindowRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppWindowRouter.swift; sourceTree = "<group>"; };
+		7AA55CDB6D71560F514C8ABB /* SettingsWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsWindowController.swift; sourceTree = "<group>"; };
 		8468A4B94263CD9C0BE9D019 /* SpeedTestPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeedTestPanel.swift; sourceTree = "<group>"; };
 		960B0940BC7F8331BEB8AA0A /* NetPulseMark.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetPulseMark.swift; sourceTree = "<group>"; };
 		9965E8D47AAE5401858EFE02 /* AdvancedSettingsTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedSettingsTab.swift; sourceTree = "<group>"; };
@@ -241,7 +241,6 @@
 		A6001F218A2B1F7B325C1986 /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
-				6CEF82E17C828F70639F765F /* AppWindowRouter.swift */,
 				D58F378474A350A734279CF4 /* Color+Brand.swift */,
 				D60B6802F9B15BF933F20250 /* Font+Brand.swift */,
 				C929CFCBA6CFB012D1C13C12 /* LoginItemManager.swift */,
@@ -287,6 +286,7 @@
 				C46519C5B5E0E3E0D6914453 /* AppDelegate.swift */,
 				EB35841A9DB537F76F0D7773 /* AppState.swift */,
 				C672234BAF162CEDAB0CE947 /* NetPulseApp.swift */,
+				7AA55CDB6D71560F514C8ABB /* SettingsWindowController.swift */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -421,7 +421,6 @@
 				4705CE57AB8EF3604BE3EC65 /* AlertsSettingsTab.swift in Sources */,
 				DD0B64ADA320F8E0213AFF09 /* AppDelegate.swift in Sources */,
 				FBE9B73DE8766FBA9BB510DA /* AppState.swift in Sources */,
-				F08CE66522D03D8BD36D72A3 /* AppWindowRouter.swift in Sources */,
 				299257BB87EF6A06838936AE /* Color+Brand.swift in Sources */,
 				31243425922AC0E029AF5D75 /* ConnectionHistoryStore.swift in Sources */,
 				34DBED3169FBDE9370EB7E8F /* DataUsageSettingsTab.swift in Sources */,
@@ -448,6 +447,7 @@
 				0954AA236762E9BB2E577790 /* QualityBadge.swift in Sources */,
 				45628C124D578E98FAD80A62 /* SelfUpdateInstaller.swift in Sources */,
 				BF09D5407901BC99F20F7469 /* SettingsView.swift in Sources */,
+				A50AA6A301DF7A5B218192CE /* SettingsWindowController.swift in Sources */,
 				B40CE2D840481E92D6AD2028 /* SpeedTestPanel.swift in Sources */,
 				40FDFBF6A09B291B6DBAFED0 /* SpeedTestService.swift in Sources */,
 				BD5DCF80AD8BAD4FC3517A96 /* StatisticsView.swift in Sources */,
@@ -480,7 +480,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 2.1.3;
+				MARKETING_VERSION = 2.2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.tonmoysarkersourav.netpulse;
 				PRODUCT_NAME = NetPulse;
 				SDKROOT = macosx;
@@ -571,7 +571,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 2.1.3;
+				MARKETING_VERSION = 2.2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.tonmoysarkersourav.netpulse;
 				PRODUCT_NAME = NetPulse;
 				SDKROOT = macosx;
