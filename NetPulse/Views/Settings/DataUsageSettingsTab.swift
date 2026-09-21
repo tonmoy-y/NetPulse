@@ -1,4 +1,5 @@
 import SwiftUI
+import NetPulseCore
 
 struct DataUsageSettingsTab: View {
     @EnvironmentObject private var appState: AppState
@@ -6,6 +7,12 @@ struct DataUsageSettingsTab: View {
 
     var body: some View {
         Form {
+            Section("Current Usage") {
+                usageRow("Today", appState.dataUsageStore.today)
+                usageRow("This week", appState.dataUsageStore.thisWeek)
+                usageRow("This month", appState.dataUsageStore.thisMonth)
+            }
+
             Section {
                 Toggle("Persist usage across launches", isOn: $appState.settings.dataUsage.persistAcrossLaunches)
 
@@ -30,5 +37,17 @@ struct DataUsageSettingsTab: View {
             Button("Reset", role: .destructive) { appState.dataUsageStore.reset() }
             Button("Cancel", role: .cancel) {}
         }
+    }
+
+    private func usageRow(_ label: String, _ totals: DataUsageTotals) -> some View {
+        HStack {
+            Text(label)
+            Spacer()
+            Text(ByteFormatter.formatBytes(Double(totals.downloadedBytes)))
+                .foregroundStyle(Color.netPulseDownload)
+            Text(ByteFormatter.formatBytes(Double(totals.uploadedBytes)))
+                .foregroundStyle(Color.netPulseUpload)
+        }
+        .font(.netPulseBody)
     }
 }

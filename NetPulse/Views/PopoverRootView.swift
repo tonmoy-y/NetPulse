@@ -27,6 +27,12 @@ struct PopoverRootView: View {
 
             Divider().padding(.top, 10)
 
+            // ScrollView has no reliable intrinsic content height of its own,
+            // so inside an auto-sizing MenuBarExtra(.window) popover it was
+            // collapsing to near-zero height (confirmed: a real screenshot
+            // came back 379x120px, just header+tabs+footer, everything
+            // between them invisible). A `minHeight` forces real space
+            // regardless of what the ScrollView itself reports.
             ScrollView {
                 switch selectedTab {
                 case .overview: OverviewView()
@@ -34,7 +40,7 @@ struct PopoverRootView: View {
                 case .statistics: StatisticsView()
                 }
             }
-            .frame(maxHeight: 380)
+            .frame(minHeight: 320, maxHeight: 380)
 
             Divider()
             footer

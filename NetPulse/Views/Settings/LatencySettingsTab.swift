@@ -22,13 +22,13 @@ struct LatencySettingsTab: View {
                         .disabled(!appState.settings.latency.isEnabled)
                 }
 
-                Picker("Ping interval", selection: $appState.settings.latency.intervalSeconds) {
+                Picker("Ping interval", selection: pingIntervalBinding) {
+                    Text("Off").tag(0.0)
                     Text("Every 2 seconds").tag(2.0)
                     Text("Every 5 seconds").tag(5.0)
                     Text("Every 10 seconds").tag(10.0)
                     Text("Every 30 seconds").tag(30.0)
                 }
-                .disabled(!appState.settings.latency.isEnabled)
             }
 
             Section {
@@ -50,5 +50,22 @@ struct LatencySettingsTab: View {
             }
         }
         .formStyle(.grouped)
+    }
+
+    // Lets "Ping interval" itself carry an explicit Off value, in addition to
+    // the "Enable latency monitoring" toggle above — both control the same
+    // underlying isEnabled flag, so either one turns pinging fully off.
+    private var pingIntervalBinding: Binding<Double> {
+        Binding(
+            get: { appState.settings.latency.isEnabled ? appState.settings.latency.intervalSeconds : 0 },
+            set: { newValue in
+                if newValue == 0 {
+                    appState.settings.latency.isEnabled = false
+                } else {
+                    appState.settings.latency.intervalSeconds = newValue
+                    appState.settings.latency.isEnabled = true
+                }
+            }
+        )
     }
 }

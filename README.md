@@ -10,14 +10,23 @@
   ↓ 2.4 MB/s&nbsp;&nbsp;↑ 384 KB/s
 </p>
 
+<p align="center">
+  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue.svg"></a>
+  <a href="https://github.com/tonmoy-y/NetPulse/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/tonmoy-y/NetPulse"></a>
+  <a href="https://github.com/tonmoy-y/NetPulse/actions/workflows/release.yml"><img alt="Build status" src="https://github.com/tonmoy-y/NetPulse/actions/workflows/release.yml/badge.svg"></a>
+</p>
+
 ---
 
 **Author:** Tonmoy Sarker Sourav
 
-NetPulse shows your Mac's live download and upload throughput directly in
-the menu bar, with a compact native popup for graphs, statistics, latency,
-data usage, and alerts — built with SwiftUI and AppKit, with no Electron, no
-webviews, and no background telemetry.
+NetPulse is **free and open source** (MIT licensed — see [LICENSE](LICENSE)).
+It shows your Mac's live download and upload throughput directly in the menu
+bar, with a compact native popup for graphs, statistics, latency, data
+usage, and alerts — built with SwiftUI and AppKit, with no Electron, no
+webviews, and no background telemetry. All source, the build pipeline, and
+the release process are public in this repository; nothing about how it's
+built or what it sends over the network is hidden.
 
 ## Features
 
@@ -168,12 +177,21 @@ swift test
 xcodebuild -project NetPulse.xcodeproj -scheme NetPulse -configuration Release build
 ```
 
-### Archive & notarize (Developer ID)
+### Archive & notarize (Developer ID) — optional
+
+**Skip this entirely unless you specifically want a Gatekeeper-clean build.**
+It's not required to build, run, or distribute NetPulse — the CI pipeline
+above (and everything in this README's main install path) already produces
+a working ad-hoc-signed `.dmg` with no Developer ID needed. This section
+only matters if you own a paid Apple Developer ID and want to remove the
+one-time right-click → Open step for people who download the `.dmg`
+directly.
 
 NetPulse is **not** sandboxed (it reads interface counters via `getifaddrs`
 and shells out to the system `/sbin/ping`, neither permitted under App
-Sandbox), so it's distributed via Developer ID, not the Mac App Store.
-`ENABLE_HARDENED_RUNTIME` is already set to `YES` in `project.yml`.
+Sandbox), so if you do notarize it, it's distributed via Developer ID, not
+the Mac App Store. `ENABLE_HARDENED_RUNTIME` is already set to `YES` in
+`project.yml`.
 
 ```bash
 xcodebuild -project NetPulse.xcodeproj -scheme NetPulse -configuration Release \
@@ -223,6 +241,15 @@ picks it up:
 1. `shasum -a 256 NetPulse-<version>.dmg` on the new release asset.
 2. Bump `version` and `sha256` in both [`Homebrew/netpulse.rb`](Homebrew/netpulse.rb) here (kept as a reference copy) **and** `Casks/netpulse.rb` in [tonmoy-y/homebrew-netpulse](https://github.com/tonmoy-y/homebrew-netpulse) (the actual tap Homebrew reads — clone it, edit, commit, push).
 
+## Contributing
+
+Issues and pull requests are welcome. There's no formal process — open an
+issue for bugs or feature ideas, or a PR directly for fixes. A few notes:
+
+- Regenerate the Xcode project after adding/removing files or editing `project.yml`: `xcodegen generate`.
+- Pure logic (formatters, statistics, alert/quality evaluation) belongs in `NetPulseCore` with tests (`cd NetPulseCore && swift test`); AppKit/SwiftUI-specific code belongs in the `NetPulse` app target.
+- CI (`.github/workflows/release.yml`) runs the real compiler and test suite on every tag push — that's the actual source of truth for "does this build," more than any local environment.
+
 ## License
 
-[MIT](LICENSE) — © 2026 Tonmoy Sarker Sourav
+NetPulse is free and open source software, licensed under the [MIT License](LICENSE) — © 2026 Tonmoy Sarker Sourav. Use it, fork it, modify it, redistribute it, for any purpose, with attribution as the license requires.
