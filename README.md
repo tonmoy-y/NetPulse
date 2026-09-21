@@ -42,27 +42,27 @@ detection, local IP info, statistics, graphs, and data usage. There is:
 
 ## Screenshots
 
-_Not included yet — this project was built and pushed from an environment with no full Xcode install and no macOS GUI to run the app in, so no one has actually run it yet to capture screenshots. Once you've built it (see below) or a tagged release has run through CI, drop images in `docs/` (e.g. `docs/screenshot-menubar.png`, `docs/screenshot-popup.png`, `docs/screenshot-settings.png`) and reference them here._
+_Not included yet. CI has now actually compiled and run this app (see [v1.0.0](https://github.com/tonmoy-y/NetPulse/releases/tag/v1.0.0)), but that's a headless build on a CI runner — nobody has opened the running app on a display yet to capture screenshots, since this was built from an environment with no macOS GUI. Install it (see below), then drop images in `docs/` (e.g. `docs/screenshot-menubar.png`, `docs/screenshot-popup.png`, `docs/screenshot-settings.png`) and reference them here._
 
 ## Installation
 
-### Option A — Download the .dmg (no Xcode needed)
+### Option A — Homebrew (recommended — one command, no Xcode)
 
-1. Go to **[Releases](../../releases)** and download the latest `NetPulse-*.dmg`.
-   - No release has been tagged yet in this repo — see [Publishing a release](#publishing-a-release) below to produce the first one. `.github/workflows/release.yml` builds it automatically on a real macOS CI runner (this repo's own dev environment can't compile it — no full Xcode installed there).
+```bash
+brew tap tonmoy-y/netpulse
+brew install --cask netpulse
+```
+
+This installs from the [tonmoy-y/homebrew-netpulse](https://github.com/tonmoy-y/homebrew-netpulse) tap, which is real and live — it points at the actual [v1.0.0 release DMG](https://github.com/tonmoy-y/NetPulse/releases/tag/v1.0.0) with its real checksum, built by this repo's own CI. The cask also clears the Gatekeeper quarantine flag automatically, so unlike a manual `.dmg` install there's no right-click-to-open step needed.
+
+### Option B — Download the .dmg directly
+
+1. Go to **[Releases](https://github.com/tonmoy-y/NetPulse/releases/latest)** and download `NetPulse-*.dmg`.
 2. Open the `.dmg` and drag **NetPulse.app** into **Applications**.
 3. **First launch only:** NetPulse is ad-hoc signed, not notarized with a paid Apple Developer ID, so Gatekeeper will say it "cannot be verified." Right-click (Control-click) **NetPulse.app** → **Open** → **Open** again. You only need to do this once; after that it opens normally, including via Launchpad/Spotlight.
 4. NetPulse appears in the menu bar — it has **no Dock icon** and **no window** to look for.
 
-> Genuinely warning-free (no right-click-to-open step) requires signing with a **paid Apple Developer ID** ($99/year) and notarizing with `notarytool` — see [Archive & notarize](#archive--notarize-developer-id) if you have one. Without it, the right-click-once step above is unavoidable for any indie-built Mac app, not specific to NetPulse.
-
-### Option B — Homebrew (once a release exists)
-
-```bash
-brew install --cask netpulse
-```
-
-This requires publishing [`Homebrew/netpulse.rb`](Homebrew/netpulse.rb) to a tap (or `homebrew/cask` itself) pointing at a real release asset — it is **not** published anywhere yet. See [Publishing a release](#publishing-a-release).
+> Genuinely warning-free (no right-click-to-open step at all, for *this* path) requires signing with a **paid Apple Developer ID** ($99/year) and notarizing with `notarytool` — see [Archive & notarize](#archive--notarize-developer-id) if you have one. Without it, this one-time step is unavoidable for any indie-built Mac app via direct `.dmg`, not specific to NetPulse — which is exactly why Option A exists.
 
 ### Option C — Build from source
 
@@ -212,8 +212,11 @@ That's it; watch the **Actions** tab, and the `.dmg` shows up on the
 tagging via the workflow's **Run workflow** button (Actions → Build NetPulse
 DMG → Run workflow) to get an artifact without publishing a release.
 
-Once a release exists, update `Homebrew/netpulse.rb`'s `sha256` (from
-`shasum -a 256 NetPulse-*.dmg`) before publishing the cask to a tap.
+After a new release, update the cask so `brew install --cask netpulse`
+picks it up:
+
+1. `shasum -a 256 NetPulse-<version>.dmg` on the new release asset.
+2. Bump `version` and `sha256` in both [`Homebrew/netpulse.rb`](Homebrew/netpulse.rb) here (kept as a reference copy) **and** `Casks/netpulse.rb` in [tonmoy-y/homebrew-netpulse](https://github.com/tonmoy-y/homebrew-netpulse) (the actual tap Homebrew reads — clone it, edit, commit, push).
 
 ## License
 
