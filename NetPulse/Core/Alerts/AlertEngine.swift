@@ -9,6 +9,13 @@ final class AlertEngine {
     private var rules: [AlertRule]
     private let onRulesChanged: ([AlertRule]) -> Void
 
+    /// Reports whether macOS actually granted notification permission.
+    /// Without this the whole Alerts feature can be silently dead — the
+    /// authorization request genuinely fails on some builds (observed:
+    /// `didGrant: 0 hasError: 1`), and every alert after that is dropped
+    /// with no indication to the user that anything is wrong.
+    var onAuthorizationResolved: ((Bool) -> Void)?
+
     init(rules: [AlertRule], onRulesChanged: @escaping ([AlertRule]) -> Void) {
         self.rules = rules
         self.onRulesChanged = onRulesChanged
@@ -70,7 +77,14 @@ final class AlertEngine {
     }
 
     private func requestAuthorizationIfNeeded() {
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in }
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { [weak self] granted, error in
+            if let error {
+                NSLog("NetPulse: notification authorization failed — \(error.localizedDescription)")
+            }
+            DispatchQueue.main.async {
+                self?.onAuthorizationResolved?(granted && error == nil)
+            }
+        }
     }
 
     private func formattedRate(_ bps: Double) -> String {

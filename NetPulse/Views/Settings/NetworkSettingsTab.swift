@@ -18,6 +18,19 @@ struct NetworkSettingsTab: View {
                     .foregroundStyle(Color.netPulseTextMuted)
             }
 
+            Section("Connection") {
+                LabeledContent("Status", value: appState.interfaceMonitor.isConnected ? "Connected" : "Disconnected")
+                LabeledContent("VPN", value: appState.interfaceMonitor.isVPNActive ? "Active" : "Not active")
+                // Public IP was previously fetched and stored but never
+                // shown anywhere, so enabling the Privacy toggle made an
+                // external request whose result the user could never see.
+                if appState.settings.privacy.publicIPLookupEnabled {
+                    LabeledContent("Public IP", value: appState.publicIP ?? "Looking up…")
+                } else {
+                    LabeledContent("Public IP", value: "Disabled in Privacy settings")
+                }
+            }
+
             Section("Detected Interfaces") {
                 if appState.interfaceMonitor.interfaces.isEmpty {
                     EmptyStateView(icon: "wifi.slash", title: "No active network interface detected", message: "Connect to Wi-Fi or Ethernet to see interface details here.")

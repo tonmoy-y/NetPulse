@@ -22,6 +22,12 @@ final class AppState: ObservableObject {
     @Published private(set) var networkQuality: NetworkQuality = .offline
     @Published private(set) var publicIP: String?
 
+    /// nil until macOS answers the authorization request. False means
+    /// notifications were denied or errored, so no alert can ever be
+    /// delivered — the Alerts settings tab says so rather than letting the
+    /// feature look functional while silently dropping everything.
+    @Published private(set) var notificationsAuthorized: Bool?
+
     let trafficSampler = TrafficSampler()
     let interfaceMonitor = InterfaceMonitor()
     let latencyMonitor = LatencyMonitor()
@@ -68,6 +74,9 @@ final class AppState: ObservableObject {
         self.alertEngine = AlertEngine(rules: loadedSettings.alertRules) { [weak self] updated in
             self?.settings.alertRules = updated
         }
+        self.alertEngine.onAuthorizationResolved = { [weak self] granted in
+            self?.notificationsAuthorized = granted
+        }
 
         self.dataUsageStore.persistAcrossLaunches = loadedSettings.dataUsage.persistAcrossLaunches
 
@@ -92,6 +101,9 @@ final class AppState: ObservableObject {
         if settings.checkForUpdatesAutomatically {
             updateChecker.checkForUpdates()
         }
+        // Previously only fetched when the toggle was flipped, so a user who
+        // enabled it once saw nothing on every later launch.
+        refreshPublicIP()
     }
 
     func stop() {

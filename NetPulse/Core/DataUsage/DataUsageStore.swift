@@ -35,18 +35,34 @@ final class DataUsageStore: ObservableObject {
     private var lastPersist = Date.distantPast
     private let persistInterval: TimeInterval = 30
 
+    /// Tracked so retention trimming runs when the day rolls over, not just
+    /// at launch.
+    private var currentDayKey: String
+
     init(persistence: PersistenceController = .shared, retentionDays: Int = 90) {
         self.persistence = persistence
         self.retentionDays = retentionDays
         let storedDays = persistence.load([String: DailyUsage].self, fileName: fileName) ?? [:]
         self.ledger = DataUsageLedger(days: storedDays)
+        self.currentDayKey = DayKeyFormatter.key(for: Date())
         recomputeRollups()
+        // Retention used to be applied only when the user changed the
+        // retention setting, so on a normal install the ledger grew
+        // forever and "Retention: 90 days" was never actually enforced.
+        trimExpired()
     }
 
     func recordBytes(downloaded: UInt64, uploaded: UInt64, at date: Date = Date()) {
         guard downloaded > 0 || uploaded > 0 else { return }
         let key = DayKeyFormatter.key(for: date)
         ledger.addBytes(downloaded: downloaded, uploaded: uploaded, toDay: key)
+
+        if key != currentDayKey {
+            currentDayKey = key
+            trimExpired() // also persists
+            return
+        }
+
         recomputeRollups()
         persist()
     }

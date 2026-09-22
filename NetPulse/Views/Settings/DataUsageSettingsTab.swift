@@ -9,8 +9,8 @@ struct DataUsageSettingsTab: View {
         Form {
             Section("Current Usage") {
                 usageRow("Today", appState.dataUsageStore.today)
-                usageRow("This week", appState.dataUsageStore.thisWeek)
-                usageRow("This month", appState.dataUsageStore.thisMonth)
+                usageRow("Last 7 days", appState.dataUsageStore.thisWeek)
+                usageRow("Last 30 days", appState.dataUsageStore.thisMonth)
             }
 
             Section {

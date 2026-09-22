@@ -6,6 +6,14 @@ struct AlertsSettingsTab: View {
 
     var body: some View {
         Form {
+            if appState.notificationsAuthorized == false {
+                Section {
+                    Text("macOS hasn't granted NetPulse permission to post notifications, so no alert below can be delivered. Enable it in System Settings → Notifications → NetPulse.")
+                        .font(.netPulseCaption)
+                        .foregroundStyle(Color.netPulseWarning)
+                }
+            }
+
             ForEach($appState.settings.alertRules) { $rule in
                 Section(rule.kind.title) {
                     Toggle("Enabled", isOn: $rule.isEnabled)

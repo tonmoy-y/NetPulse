@@ -34,8 +34,8 @@ struct StatisticsView: View {
         VStack(alignment: .leading, spacing: 6) {
             SectionHeader("Data Usage")
             StatRow("Today", down: bytes(appState.dataUsageStore.today.downloadedBytes), up: bytes(appState.dataUsageStore.today.uploadedBytes))
-            StatRow("This week", down: bytes(appState.dataUsageStore.thisWeek.downloadedBytes), up: bytes(appState.dataUsageStore.thisWeek.uploadedBytes))
-            StatRow("This month", down: bytes(appState.dataUsageStore.thisMonth.downloadedBytes), up: bytes(appState.dataUsageStore.thisMonth.uploadedBytes))
+            StatRow("Last 7 days", down: bytes(appState.dataUsageStore.thisWeek.downloadedBytes), up: bytes(appState.dataUsageStore.thisWeek.uploadedBytes))
+            StatRow("Last 30 days", down: bytes(appState.dataUsageStore.thisMonth.downloadedBytes), up: bytes(appState.dataUsageStore.thisMonth.uploadedBytes))
         }
     }
 
