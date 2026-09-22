@@ -56,7 +56,11 @@ GitHub Releases and can be turned off in Settings → General.
 brew tap tonmoy-y/netpulse
 brew install --cask netpulse
 ```
+or in one line:
 
+```bash
+brew install --cask tonmoy-y/netpulse/netpulse
+```
 Installs from the [tonmoy-y/homebrew-netpulse](https://github.com/tonmoy-y/homebrew-netpulse)
 tap and clears the Gatekeeper quarantine flag automatically. If Homebrew
 warns about an untrusted tap, run `brew trust --cask tonmoy-y/netpulse/netpulse`
