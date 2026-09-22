@@ -88,6 +88,10 @@ final class InterfaceMonitor: ObservableObject {
     private static func discoverInterfaces() -> [NetworkInterfaceInfo] {
         var addressesByName: [String: (ipv4: String?, ipv6: String?)] = [:]
         var flagsByName: [String: (isUp: Bool, isRunning: Bool)] = [:]
+        // Collected in this same pass. Looking each one up separately meant
+        // a fresh full getifaddrs() walk per interface — O(n²) syscalls
+        // every refresh, repeated every 5 seconds for the app's lifetime.
+        var macByName: [String: String] = [:]
 
         var ifaddrPtr: UnsafeMutablePointer<ifaddrs>?
         guard getifaddrs(&ifaddrPtr) == 0, let first = ifaddrPtr else { return [] }
@@ -105,6 +109,8 @@ final class InterfaceMonitor: ObservableObject {
                 entry.ipv4 = ipAddressString(addr.ifa_addr, family: AF_INET)
             } else if family == UInt8(AF_INET6) {
                 entry.ipv6 = ipAddressString(addr.ifa_addr, family: AF_INET6)
+            } else if family == UInt8(AF_LINK), let mac = macAddress(from: addr.ifa_addr) {
+                macByName[name] = mac
             }
             addressesByName[name] = entry
 
@@ -131,7 +137,7 @@ final class InterfaceMonitor: ObservableObject {
                 isActive: flags.isUp && flags.isRunning && (addresses.ipv4 != nil || addresses.ipv6 != nil),
                 isUp: flags.isUp,
                 linkSpeedMbps: nil,
-                macAddress: macAddress(bsdName: name),
+                macAddress: macByName[name],
                 ipv4: addresses.ipv4,
                 ipv6: addresses.ipv6
             ))
@@ -163,32 +169,19 @@ final class InterfaceMonitor: ObservableObject {
         return address.split(separator: "%").first.map(String.init)
     }
 
-    private static func macAddress(bsdName: String) -> String? {
-        var ifaddrPtr: UnsafeMutablePointer<ifaddrs>?
-        guard getifaddrs(&ifaddrPtr) == 0, let first = ifaddrPtr else { return nil }
-        defer { freeifaddrs(ifaddrPtr) }
+    /// Reads the hardware address out of an AF_LINK sockaddr already in
+    /// hand, so interface discovery can collect MACs during its single
+    /// getifaddrs() walk rather than re-walking the list per interface.
+    private static func macAddress(from sockaddrPtr: UnsafeMutablePointer<sockaddr>) -> String? {
+        var sdl = UnsafeRawPointer(sockaddrPtr).assumingMemoryBound(to: sockaddr_dl.self).pointee
+        guard Int(sdl.sdl_alen) == 6 else { return nil }
 
-        var pointer: UnsafeMutablePointer<ifaddrs>? = first
-        while let current = pointer {
-            defer { pointer = current.pointee.ifa_next }
-            let addr = current.pointee
-            guard String(cString: addr.ifa_name) == bsdName, addr.ifa_addr.pointee.sa_family == UInt8(AF_LINK) else { continue }
-            guard let dataPtr = addr.ifa_data else { continue }
-
-            let socketAddr = UnsafeRawPointer(addr.ifa_addr).assumingMemoryBound(to: sockaddr_dl.self).pointee
-            _ = dataPtr
-            var sdl = socketAddr
-            let addressLength = Int(sdl.sdl_alen)
-            guard addressLength == 6 else { continue }
-
-            let macBytes = withUnsafePointer(to: &sdl.sdl_data) { ptr -> [UInt8] in
-                ptr.withMemoryRebound(to: UInt8.self, capacity: 12) { base in
-                    let offset = Int(sdl.sdl_nlen)
-                    return (0..<6).map { base[offset + $0] }
-                }
+        let macBytes = withUnsafePointer(to: &sdl.sdl_data) { ptr -> [UInt8] in
+            ptr.withMemoryRebound(to: UInt8.self, capacity: 12) { base in
+                let offset = Int(sdl.sdl_nlen)
+                return (0..<6).map { base[offset + $0] }
             }
-            return macBytes.map { String(format: "%02x", $0) }.joined(separator: ":")
         }
-        return nil
+        return macBytes.map { String(format: "%02x", $0) }.joined(separator: ":")
     }
 }

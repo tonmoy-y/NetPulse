@@ -74,6 +74,11 @@ final class LatencyMonitor: ObservableObject {
         let data = outputPipe.fileHandleForReading.readDataToEndOfFile()
         guard let output = String(data: data, encoding: .utf8) else { return nil }
 
+        // ping reports sub-millisecond replies as "time<1 ms" rather than
+        // "time=0.4 ms". Without this they'd parse as nil and be counted as
+        // lost packets, inflating the packet-loss figure on fast links.
+        if output.contains("time<1 ms") { return 0.5 }
+
         guard let range = output.range(of: "time="),
               let end = output[range.upperBound...].firstIndex(of: " ") else { return nil }
 

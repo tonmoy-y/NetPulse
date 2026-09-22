@@ -37,6 +37,20 @@ final class AppState: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     private var lastThroughputSampleTime: Date?
 
+    /// `@Published` replays its current value to new subscribers, so the
+    /// initial `isConnected == false` would fire a "connection lost" alert
+    /// the instant the app launched, immediately followed by "connection
+    /// restored" once NWPathMonitor reported the real state — a spurious
+    /// pair of notifications on every single launch. The first observed
+    /// state establishes a baseline instead of counting as a transition.
+    private var hasObservedInitialConnectionState = false
+
+    /// Lifetime totals are written to disk on a timer rather than on every
+    /// sample — at a 1-second sampling cadence that was a disk write every
+    /// second, forever, for a value that only needs to survive a quit.
+    private var lastTotalsPersist = Date.distantPast
+    private let totalsPersistInterval: TimeInterval = 30
+
     init(persistence: PersistenceController = .shared) {
         self.persistence = persistence
         let loadedSettings = persistence.loadSettings()
@@ -54,6 +68,8 @@ final class AppState: ObservableObject {
         self.alertEngine = AlertEngine(rules: loadedSettings.alertRules) { [weak self] updated in
             self?.settings.alertRules = updated
         }
+
+        self.dataUsageStore.persistAcrossLaunches = loadedSettings.dataUsage.persistAcrossLaunches
 
         trafficSampler.primaryInterfaceProvider = { [weak self] in
             self?.interfaceMonitor.primaryInterface?.bsdName
@@ -82,6 +98,19 @@ final class AppState: ObservableObject {
         trafficSampler.stop()
         interfaceMonitor.stop()
         latencyMonitor.stop()
+        flushPendingWrites()
+    }
+
+    /// Writes anything held back by write-throttling straight away. Called
+    /// on quit and before sleep so throttling never costs recorded data.
+    func flushPendingWrites() {
+        persistTotals()
+        dataUsageStore.flush()
+    }
+
+    private func persistTotals() {
+        persistence.save(trafficStatistics, fileName: "lifetime_totals.json")
+        lastTotalsPersist = Date()
     }
 
     // MARK: - Wiring
@@ -96,7 +125,11 @@ final class AppState: ObservableObject {
             .sink { [weak self] connected in
                 guard let self else { return }
                 self.connectionHistoryStore.record(isConnected: connected, interfaceName: self.interfaceMonitor.primaryInterface?.displayName)
-                self.alertEngine.evaluateConnection(isConnected: connected)
+                if self.hasObservedInitialConnectionState {
+                    self.alertEngine.evaluateConnection(isConnected: connected)
+                } else {
+                    self.hasObservedInitialConnectionState = true
+                }
                 self.recomputeQuality()
             }
             .store(in: &cancellables)
@@ -126,7 +159,9 @@ final class AppState: ObservableObject {
         let uploadedDelta = UInt64(max(0, sample.uploadBytesPerSecond * elapsed))
         dataUsageStore.recordBytes(downloaded: downloadedDelta, uploaded: uploadedDelta, at: now)
 
-        persistence.save(trafficStatistics, fileName: "lifetime_totals.json")
+        if now.timeIntervalSince(lastTotalsPersist) >= totalsPersistInterval {
+            persistTotals()
+        }
         alertEngine.evaluateThroughput(downloadBps: sample.downloadBytesPerSecond, uploadBps: sample.uploadBytesPerSecond)
     }
 
@@ -160,6 +195,9 @@ final class AppState: ObservableObject {
         }
         if previous.dataUsage.retentionDays != settings.dataUsage.retentionDays {
             dataUsageStore.updateRetention(days: settings.dataUsage.retentionDays)
+        }
+        if previous.dataUsage.persistAcrossLaunches != settings.dataUsage.persistAcrossLaunches {
+            dataUsageStore.persistAcrossLaunches = settings.dataUsage.persistAcrossLaunches
         }
         if previous.launchAtLogin != settings.launchAtLogin {
             LoginItemManager.setEnabled(settings.launchAtLogin)

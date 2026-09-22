@@ -15,6 +15,26 @@ final class DataUsageStore: ObservableObject {
     private let persistence: PersistenceController
     private var retentionDays: Int
 
+    /// Honors Settings → Data Usage → "Persist usage across launches". When
+    /// off, usage is still tracked for the current session but never
+    /// written to disk, and anything previously written is removed.
+    var persistAcrossLaunches: Bool = true {
+        didSet {
+            guard persistAcrossLaunches != oldValue else { return }
+            if persistAcrossLaunches {
+                persist(force: true)
+            } else {
+                persistence.delete(fileName: fileName)
+            }
+        }
+    }
+
+    // Written on a timer rather than on every sample: at a 1-second
+    // sampling cadence, persisting per sample meant a disk write every
+    // second for the entire time the app was running.
+    private var lastPersist = Date.distantPast
+    private let persistInterval: TimeInterval = 30
+
     init(persistence: PersistenceController = .shared, retentionDays: Int = 90) {
         self.persistence = persistence
         self.retentionDays = retentionDays
@@ -31,6 +51,11 @@ final class DataUsageStore: ObservableObject {
         persist()
     }
 
+    /// Writes immediately regardless of the throttle — used on quit/sleep.
+    func flush() {
+        persist(force: true)
+    }
+
     func updateRetention(days: Int) {
         retentionDays = days
         trimExpired()
@@ -39,14 +64,14 @@ final class DataUsageStore: ObservableObject {
     func reset() {
         ledger.reset()
         recomputeRollups()
-        persist()
+        persist(force: true)
     }
 
     private func trimExpired() {
         let keep = Set(DayKeyFormatter.recentDayKeys(count: retentionDays))
         ledger.trim(keepingDayKeys: keep)
         recomputeRollups()
-        persist()
+        persist(force: true)
     }
 
     private func recomputeRollups() {
@@ -56,7 +81,10 @@ final class DataUsageStore: ObservableObject {
         thisMonth = ledger.totals(forDayKeys: DayKeyFormatter.recentDayKeys(count: 30, endingAt: now))
     }
 
-    private func persist() {
+    private func persist(force: Bool = false) {
+        guard persistAcrossLaunches else { return }
+        guard force || Date().timeIntervalSince(lastPersist) >= persistInterval else { return }
         persistence.save(ledger.days, fileName: fileName)
+        lastPersist = Date()
     }
 }

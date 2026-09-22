@@ -81,7 +81,6 @@ public struct PrivacySettings: Codable, Equatable {
 public struct AppSettings: Codable, Equatable {
     public var refreshInterval: RefreshInterval = .ms500
     public var launchAtLogin: Bool = false
-    public var startHidden: Bool = false
     public var isMonitoringPaused: Bool = false
     public var checkForUpdatesAutomatically: Bool = true
 

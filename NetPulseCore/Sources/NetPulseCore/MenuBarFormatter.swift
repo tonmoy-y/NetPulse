@@ -56,10 +56,10 @@ public enum MenuBarFormatter {
     }
 
     private static func rate(_ bytesPerSecond: Double, options: MenuBarDisplayOptions) -> String {
-        if options.showUnits {
-            return ByteFormatter.formatRate(bytesPerSecond: bytesPerSecond, decimalPlaces: options.decimalPlaces)
-        }
-        let (value, _) = ByteFormatter.components(bytes: bytesPerSecond, decimalPlaces: options.decimalPlaces)
-        return value
+        let (value, unit) = ByteFormatter.components(bytes: bytesPerSecond, decimalPlaces: options.decimalPlaces)
+        guard options.showUnits else { return value }
+        // Compact mode exists to save menu bar width: drop the space before
+        // the unit and the "/s" suffix ("2.4MB" instead of "2.4 MB/s").
+        return options.compact ? "\(value)\(unit)" : "\(value) \(unit)/s"
     }
 }

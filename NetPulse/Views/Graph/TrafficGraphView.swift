@@ -4,8 +4,6 @@ import NetPulseCore
 
 struct TrafficGraphView: View {
     @EnvironmentObject private var appState: AppState
-    @State private var showDownload = true
-    @State private var showUpload = true
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -20,10 +18,14 @@ struct TrafficGraphView: View {
 
                 Spacer()
 
-                Toggle("Download", isOn: $showDownload)
+                // Bound to the persisted settings, not local view state —
+                // otherwise Settings → Graph → "Show download/upload line"
+                // had no effect on this graph, and these checkboxes reset
+                // every time the popover was reopened.
+                Toggle("Download", isOn: $appState.settings.showDownloadInGraph)
                     .toggleStyle(.checkbox)
                     .font(.netPulseCaption)
-                Toggle("Upload", isOn: $showUpload)
+                Toggle("Upload", isOn: $appState.settings.showUploadInGraph)
                     .toggleStyle(.checkbox)
                     .font(.netPulseCaption)
             }
@@ -37,7 +39,7 @@ struct TrafficGraphView: View {
                 .frame(height: 200)
             } else {
                 Chart {
-                    if showDownload {
+                    if appState.settings.showDownloadInGraph {
                         ForEach(samples) { sample in
                             AreaMark(
                                 x: .value("Time", sample.timestamp),
@@ -52,7 +54,7 @@ struct TrafficGraphView: View {
                             .interpolationMethod(.monotone)
                         }
                     }
-                    if showUpload {
+                    if appState.settings.showUploadInGraph {
                         ForEach(samples) { sample in
                             LineMark(
                                 x: .value("Time", sample.timestamp),

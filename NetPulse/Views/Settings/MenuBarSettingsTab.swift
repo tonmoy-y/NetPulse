@@ -32,11 +32,6 @@ struct MenuBarSettingsTab: View {
             }
         }
         .formStyle(.grouped)
-        .onChange(of: appState.settings.menuBar.compact) { compact in
-            if compact {
-                appState.settings.menuBar.decimalPlaces = 0
-            }
-        }
     }
 
     private var preview: String {

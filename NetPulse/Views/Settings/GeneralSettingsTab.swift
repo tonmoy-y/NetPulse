@@ -9,7 +9,6 @@ struct GeneralSettingsTab: View {
         Form {
             Section {
                 Toggle("Launch at login", isOn: $appState.settings.launchAtLogin)
-                Toggle("Start hidden", isOn: $appState.settings.startHidden)
                 Toggle("Pause monitoring", isOn: $appState.settings.isMonitoringPaused)
             }
 

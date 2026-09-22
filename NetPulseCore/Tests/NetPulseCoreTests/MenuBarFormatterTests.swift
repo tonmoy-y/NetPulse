@@ -43,4 +43,22 @@ final class MenuBarFormatterTests: XCTestCase {
         let result = MenuBarFormatter.format(downloadBps: 1024, uploadBps: 0, options: options)
         XCTAssertEqual(result, "↓ 1")
     }
+
+    func testCompactModeDropsSpaceAndPerSecondSuffix() {
+        var options = MenuBarDisplayOptions()
+        options.mode = .downloadOnly
+        options.compact = true
+        options.decimalPlaces = 1
+        let result = MenuBarFormatter.format(downloadBps: 2.4 * 1024 * 1024, uploadBps: 0, options: options)
+        XCTAssertEqual(result, "↓ 2.4MB")
+    }
+
+    func testNonCompactKeepsFullUnit() {
+        var options = MenuBarDisplayOptions()
+        options.mode = .downloadOnly
+        options.compact = false
+        options.decimalPlaces = 1
+        let result = MenuBarFormatter.format(downloadBps: 2.4 * 1024 * 1024, uploadBps: 0, options: options)
+        XCTAssertEqual(result, "↓ 2.4 MB/s")
+    }
 }
