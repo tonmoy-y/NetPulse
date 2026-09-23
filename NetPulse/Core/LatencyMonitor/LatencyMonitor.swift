@@ -19,7 +19,9 @@ final class LatencyMonitor: ObservableObject {
         guard !host.isEmpty else { return }
 
         let source = DispatchSource.makeTimerSource(queue: queue)
-        source.schedule(deadline: .now(), repeating: interval)
+        // Probes don't need to be precisely spaced; the leeway lets macOS
+        // batch this wakeup with others.
+        source.schedule(deadline: .now(), repeating: interval, leeway: .milliseconds(max(250, Int(interval * 1000 * 0.1))))
         source.setEventHandler { [weak self] in
             self?.pingOnce(host: host)
         }

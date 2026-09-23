@@ -5,10 +5,16 @@ import NetPulseCore
 struct TrafficGraphView: View {
     @EnvironmentObject private var appState: AppState
 
+    /// Enough resolution for a ~330pt-wide plot; anything beyond this is
+    /// invisible detail that still costs layout and rendering every second.
+    private let maxPlottedPoints = 120
+
     var body: some View {
+        let points = chartPoints
+
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Picker("Window", selection: windowBinding) {
+                Picker("Window", selection: $appState.settings.graphTimeWindow) {
                     ForEach(GraphTimeWindow.allCases) { window in
                         Text(window.label).tag(window)
                     }
@@ -18,10 +24,8 @@ struct TrafficGraphView: View {
 
                 Spacer()
 
-                // Bound to the persisted settings, not local view state —
-                // otherwise Settings → Graph → "Show download/upload line"
-                // had no effect on this graph, and these checkboxes reset
-                // every time the popover was reopened.
+                // Bound to persisted settings so Settings → Graph and these
+                // checkboxes stay in sync and survive reopening the popover.
                 Toggle("Download", isOn: $appState.settings.showDownloadInGraph)
                     .toggleStyle(.checkbox)
                     .font(.netPulseCaption)
@@ -30,7 +34,7 @@ struct TrafficGraphView: View {
                     .font(.netPulseCaption)
             }
 
-            if samples.isEmpty {
+            if points.isEmpty {
                 EmptyStateView(
                     icon: "waveform.path.ecg",
                     title: "No traffic yet",
@@ -40,7 +44,7 @@ struct TrafficGraphView: View {
             } else {
                 Chart {
                     if appState.settings.showDownloadInGraph {
-                        ForEach(samples) { sample in
+                        ForEach(points) { sample in
                             AreaMark(
                                 x: .value("Time", sample.timestamp),
                                 y: .value("Download", sample.downloadBytesPerSecond)
@@ -55,7 +59,7 @@ struct TrafficGraphView: View {
                         }
                     }
                     if appState.settings.showUploadInGraph {
-                        ForEach(samples) { sample in
+                        ForEach(points) { sample in
                             LineMark(
                                 x: .value("Time", sample.timestamp),
                                 y: .value("Upload", sample.uploadBytesPerSecond)
@@ -88,14 +92,8 @@ struct TrafficGraphView: View {
         .padding(14)
     }
 
-    private var samples: [NetworkSample] {
-        appState.trafficSampler.samples(inLast: appState.settings.graphTimeWindow.rawValue)
-    }
-
-    private var windowBinding: Binding<GraphTimeWindow> {
-        Binding(
-            get: { appState.settings.graphTimeWindow },
-            set: { appState.settings.graphTimeWindow = $0 }
-        )
+    private var chartPoints: [NetworkSample] {
+        let raw = appState.trafficSampler.samples(inLast: appState.settings.graphTimeWindow.rawValue)
+        return SampleDownsampler.downsample(raw, maxPoints: maxPlottedPoints)
     }
 }

@@ -12,7 +12,7 @@ struct NetPulseApp: App {
                 .frame(width: 360)
         } label: {
             MenuBarLabelView()
-                .environmentObject(appState)
+                .environmentObject(appState.menuBarModel)
         }
         .menuBarExtraStyle(.window)
 

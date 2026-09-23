@@ -14,7 +14,11 @@ final class AppState: ObservableObject {
     static let shared = AppState()
 
     @Published var settings: AppSettings {
-        didSet { persistence.saveSettings(settings); applySettingsSideEffects(previous: oldValue) }
+        didSet {
+            persistence.saveSettings(settings)
+            applySettingsSideEffects(previous: oldValue)
+            refreshMenuBar()
+        }
     }
 
     @Published private(set) var trafficStatistics = TrafficStatistics()
@@ -36,6 +40,7 @@ final class AppState: ObservableObject {
     let speedTestService = SpeedTestService()
     let updateChecker = UpdateChecker()
     let selfUpdateInstaller = SelfUpdateInstaller()
+    let menuBarModel = MenuBarModel()
 
     private var alertEngine: AlertEngine!
     private let persistence: PersistenceController
@@ -59,7 +64,8 @@ final class AppState: ObservableObject {
 
     init(persistence: PersistenceController = .shared) {
         self.persistence = persistence
-        let loadedSettings = persistence.loadSettings()
+        var loadedSettings = persistence.loadSettings()
+        loadedSettings.refreshInterval = loadedSettings.refreshInterval.normalized
         self.settings = loadedSettings
         self.dataUsageStore = DataUsageStore(persistence: persistence, retentionDays: loadedSettings.dataUsage.retentionDays)
 
@@ -85,6 +91,7 @@ final class AppState: ObservableObject {
         }
 
         wireUpMonitors()
+        refreshMenuBar()
     }
 
     func start() {
@@ -166,6 +173,7 @@ final class AppState: ObservableObject {
 
         statisticsAccumulator.record(sample, elapsedSeconds: elapsed)
         trafficStatistics = statisticsAccumulator.statistics
+        refreshMenuBar()
 
         let downloadedDelta = UInt64(max(0, sample.downloadBytesPerSecond * elapsed))
         let uploadedDelta = UInt64(max(0, sample.uploadBytesPerSecond * elapsed))
@@ -181,13 +189,34 @@ final class AppState: ObservableObject {
         // "Stable" throughput heuristic: don't reward a single fast sample —
         // require at least a few real measurements before calling it excellent.
         let stable = trafficSampler.recentSamples.count >= 3
-        networkQuality = NetworkQualityEvaluator.evaluate(
+        let quality = NetworkQualityEvaluator.evaluate(
             isConnected: interfaceMonitor.isConnected,
             averageLatencyMs: latencyStatistics.average,
             packetLossPercent: latencyStatistics.packetLossPercent,
             recentThroughputStable: stable,
             thresholds: settings.qualityThresholds
         )
+        // @Published fires on every assignment, equal or not, and each one
+        // re-renders every view observing AppState.
+        if quality != networkQuality {
+            networkQuality = quality
+            refreshMenuBar()
+        }
+    }
+
+    private func refreshMenuBar() {
+        let text = MenuBarFormatter.format(
+            downloadBps: trafficStatistics.currentDownloadBps,
+            uploadBps: trafficStatistics.currentUploadBps,
+            options: settings.menuBar
+        )
+        let dot: MenuBarModel.StatusDot
+        switch (settings.showConnectionStateInMenuBar, networkQuality) {
+        case (true, .offline): dot = .error
+        case (true, .poor): dot = .warning
+        default: dot = .none
+        }
+        menuBarModel.update(text: text, dot: dot)
     }
 
     // MARK: - Settings side effects

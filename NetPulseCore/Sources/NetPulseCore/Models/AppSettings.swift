@@ -10,6 +10,17 @@ public enum RefreshInterval: Double, Codable, CaseIterable, Identifiable, Hashab
 
     public var id: Double { rawValue }
 
+    /// Sub-second cases are kept only so settings saved by older versions
+    /// still decode — removing a case would make decoding throw and reset
+    /// every setting. Readings can't be made reliable faster than once a
+    /// second, so they're no longer offered.
+    public static let selectableCases: [RefreshInterval] = [.s1, .s2, .s5]
+
+    /// Maps legacy sub-second values onto the fastest supported interval.
+    public var normalized: RefreshInterval {
+        rawValue < 1 ? .s1 : self
+    }
+
     public var label: String {
         switch self {
         case .ms100: return "100 ms"
@@ -79,7 +90,7 @@ public struct PrivacySettings: Codable, Equatable {
 }
 
 public struct AppSettings: Codable, Equatable {
-    public var refreshInterval: RefreshInterval = .ms500
+    public var refreshInterval: RefreshInterval = .s1
     public var launchAtLogin: Bool = false
     public var isMonitoringPaused: Bool = false
     public var checkForUpdatesAutomatically: Bool = true

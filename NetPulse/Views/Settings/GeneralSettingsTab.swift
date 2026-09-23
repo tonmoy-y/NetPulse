@@ -14,11 +14,11 @@ struct GeneralSettingsTab: View {
 
             Section("Update Interval") {
                 Picker("Refresh every", selection: $appState.settings.refreshInterval) {
-                    ForEach(RefreshInterval.allCases) { interval in
+                    ForEach(RefreshInterval.selectableCases) { interval in
                         Text(interval.label).tag(interval)
                     }
                 }
-                Text("Lower intervals update faster but use slightly more CPU. 500 ms is a good default.")
+                Text("Longer intervals use less energy. Readings can't be made reliable faster than once a second.")
                     .font(.netPulseCaption)
                     .foregroundStyle(Color.netPulseTextMuted)
             }

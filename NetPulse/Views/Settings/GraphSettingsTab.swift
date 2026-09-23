@@ -38,6 +38,7 @@ struct GraphSettingsTab: View {
 
     @ViewBuilder
     private var preview: some View {
+        let samples = self.samples
         if samples.isEmpty {
             EmptyStateView(
                 icon: "waveform.path.ecg",
@@ -87,6 +88,7 @@ struct GraphSettingsTab: View {
     }
 
     private var samples: [NetworkSample] {
-        appState.trafficSampler.samples(inLast: appState.settings.graphTimeWindow.rawValue)
+        let raw = appState.trafficSampler.samples(inLast: appState.settings.graphTimeWindow.rawValue)
+        return SampleDownsampler.downsample(raw, maxPoints: 90)
     }
 }

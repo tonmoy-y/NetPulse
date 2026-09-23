@@ -27,7 +27,7 @@ webviews, no telemetry. Free and open source under the MIT license.
 
 ## Features
 
-- **Live menu bar speed** — real download/upload throughput from interface byte counters, not simulated. Refresh interval configurable from 100 ms to 5 s.
+- **Live menu bar speed** — real download/upload throughput from interface byte counters, not simulated. Refresh interval configurable from 1 s to 5 s.
 - **Six menu bar display modes** — inline arrows, stacked arrows, lettered, value-first, download-only, upload-only, with configurable units/decimals/separator/compact mode.
 - **Interface awareness** — auto-detects Wi-Fi, Ethernet, Thunderbolt/USB Ethernet, and VPN interfaces; Auto mode prefers a wired link over Wi-Fi over VPN tunnels, or pin a specific interface manually.
 - **Popup with Overview / Graph / Statistics tabs** — live numbers, a Swift Charts graph (30s–1h windows), and current/average/peak/session/lifetime traffic stats.

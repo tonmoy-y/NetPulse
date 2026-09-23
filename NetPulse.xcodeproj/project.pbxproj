@@ -28,6 +28,7 @@
 		4F3F049F433528C15AC305CF /* PersistenceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408760726171DD39D3144CFF /* PersistenceController.swift */; };
 		530624F12869E6CBC84A6CC2 /* LatencySettingsTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 064D329B89A5AE4A96FE631A /* LatencySettingsTab.swift */; };
 		53941CEA1345722B2661054C /* UpdateChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BAEA50FC9D7966EFD2E17F6 /* UpdateChecker.swift */; };
+		7B4AC334A6F2C31BA1CF45B2 /* MenuBarModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C15C7B84FD2E7A73864CE6D3 /* MenuBarModel.swift */; };
 		804616A299F12A4E7F0C0968 /* AdvancedSettingsTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9965E8D47AAE5401858EFE02 /* AdvancedSettingsTab.swift */; };
 		841ED53D921C84D2F9A9DC00 /* TrafficGraphView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFBD73EB995724667AD6BB72 /* TrafficGraphView.swift */; };
 		9B27BBE650C1FD84F9899241 /* AboutTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DE4B9E3ACEA55C6A2024833 /* AboutTab.swift */; };
@@ -78,6 +79,7 @@
 		B3DDF7CA259E5353FBF52298 /* PublicIPService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublicIPService.swift; sourceTree = "<group>"; };
 		B62D9D2EA6843F359F9CB7B7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		BFBD73EB995724667AD6BB72 /* TrafficGraphView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrafficGraphView.swift; sourceTree = "<group>"; };
+		C15C7B84FD2E7A73864CE6D3 /* MenuBarModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarModel.swift; sourceTree = "<group>"; };
 		C46519C5B5E0E3E0D6914453 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		C6230738AFD9FF33B6A6B549 /* QualityBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QualityBadge.swift; sourceTree = "<group>"; };
 		C672234BAF162CEDAB0CE947 /* NetPulseApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetPulseApp.swift; sourceTree = "<group>"; };
@@ -262,6 +264,7 @@
 			isa = PBXGroup;
 			children = (
 				E561837C24CC086893ECDFDA /* MenuBarLabelView.swift */,
+				C15C7B84FD2E7A73864CE6D3 /* MenuBarModel.swift */,
 			);
 			path = MenuBar;
 			sourceTree = "<group>";
@@ -438,6 +441,7 @@
 				530624F12869E6CBC84A6CC2 /* LatencySettingsTab.swift in Sources */,
 				1883CB6DEECFD29EAB70F7BD /* LoginItemManager.swift in Sources */,
 				2910341D3C9C260E6333BAA0 /* MenuBarLabelView.swift in Sources */,
+				7B4AC334A6F2C31BA1CF45B2 /* MenuBarModel.swift in Sources */,
 				46F9A64932C5CD234376C309 /* MenuBarSettingsTab.swift in Sources */,
 				2615EE74752C5A361BFD1B9F /* NetPulseApp.swift in Sources */,
 				112AD3054F86FE5D1CEEEFD5 /* NetPulseMark.swift in Sources */,
@@ -475,6 +479,9 @@
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEPLOYMENT_POSTPROCESSING = YES;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -484,10 +491,14 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 2.4.0;
+				MARKETING_VERSION = 2.5.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.tonmoysarkersourav.netpulse;
 				PRODUCT_NAME = NetPulse;
 				SDKROOT = macosx;
+				STRIP_INSTALLED_PRODUCT = YES;
+				STRIP_STYLE = all;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
@@ -575,7 +586,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 2.4.0;
+				MARKETING_VERSION = 2.5.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.tonmoysarkersourav.netpulse;
 				PRODUCT_NAME = NetPulse;
 				SDKROOT = macosx;

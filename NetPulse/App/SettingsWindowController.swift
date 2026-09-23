@@ -24,9 +24,7 @@ final class SettingsWindowController: NSWindowController, NSWindowDelegate, NSTo
 
     private var tabSelection: SettingsTabSelection!
 
-    private convenience init() {
-        let tabSelection = SettingsTabSelection()
-
+    private static func makeContent(tabSelection: SettingsTabSelection) -> NSViewController {
         let hosting = NSHostingController(
             rootView: SettingsView()
                 .environmentObject(AppState.shared)
@@ -38,8 +36,13 @@ final class SettingsWindowController: NSWindowController, NSWindowDelegate, NSTo
         // match it — the window would silently snap back to that size every
         // time content changed, undoing any manual resize.
         hosting.sizingOptions = []
+        return hosting
+    }
 
-        let window = NSWindow(contentViewController: hosting)
+    private convenience init() {
+        let tabSelection = SettingsTabSelection()
+
+        let window = NSWindow(contentViewController: Self.makeContent(tabSelection: tabSelection))
         window.styleMask = [.titled, .closable, .miniaturizable, .resizable]
         window.title = "NetPulse Settings"
         window.titlebarAppearsTransparent = true
@@ -61,8 +64,22 @@ final class SettingsWindowController: NSWindowController, NSWindowDelegate, NSTo
     }
 
     func show() {
+        if let window, window.contentViewController == nil {
+            // Rebuild the content torn down on close, keeping the window's
+            // size and position where the user left them.
+            let frame = window.frame
+            window.contentViewController = Self.makeContent(tabSelection: tabSelection)
+            window.setFrame(frame, display: false)
+        }
         NSApp.activate(ignoringOtherApps: true)
         window?.makeKeyAndOrderFront(nil)
+    }
+
+    /// The window object is kept for reuse, but its SwiftUI content is
+    /// dropped on close. Otherwise the hidden view tree would keep observing
+    /// AppState — which publishes every second — for as long as the app runs.
+    func windowWillClose(_ notification: Notification) {
+        window?.contentViewController = nil
     }
 
     @objc private func selectTab(_ sender: NSToolbarItem) {

@@ -23,7 +23,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.tonmoysarkersourav.netpulse
         PRODUCT_NAME: NetPulse
-        MARKETING_VERSION: "2.4.0"
+        MARKETING_VERSION: "2.5.0"
         CURRENT_PROJECT_VERSION: "1"
         INFOPLIST_FILE: NetPulse/Resources/Info.plist
         CODE_SIGN_ENTITLEMENTS: NetPulse/Resources/NetPulse.entitlements
@@ -44,6 +44,19 @@ targets:
         CODE_SIGNING_REQUIRED: NO
         CODE_SIGNING_ALLOWED: YES
         DEVELOPMENT_TEAM: ""
+      configs:
+        # Release binaries were shipping with their full symbol table.
+        # Stripping (with dead-code removal) shrinks the executable on disk
+        # and the memory mapped at launch; crash symbolication isn't lost
+        # because the symbols go into the separate .dSYM.
+        Release:
+          DEAD_CODE_STRIPPING: YES
+          DEPLOYMENT_POSTPROCESSING: YES
+          STRIP_INSTALLED_PRODUCT: YES
+          STRIP_STYLE: all
+          DEBUG_INFORMATION_FORMAT: dwarf-with-dsym
+          SWIFT_OPTIMIZATION_LEVEL: "-O"
+          SWIFT_COMPILATION_MODE: wholemodule
     dependencies:
       - package: NetPulseCore
         product: NetPulseCore
